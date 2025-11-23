@@ -1,6 +1,10 @@
 package com.team.bytedancewaterfall.data.service.impl;
 
-import com.team.bytedancewaterfall.data.entity.FeedItem;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
+import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 import com.team.bytedancewaterfall.data.service.FeedService;
 import com.team.bytedancewaterfall.data.vurtualData.FeedItemData;
 
@@ -38,5 +42,16 @@ public class FeedServiceImpl implements FeedService {
             return FeedItemData.updateFeedItem(feedItem);
         }
         return false;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @Override
+    public List<FeedItem> getFeedListByTag(String tag) {
+        if (StringUtils.isEmpty(tag)) {
+            return Collections.emptyList();
+        }
+        return FeedItemData.getFeedItemList().stream()
+                .filter(item -> item.getTags().contains(tag))
+                .toList();
     }
 }

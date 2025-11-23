@@ -1,6 +1,6 @@
 package com.team.bytedancewaterfall.data.service;
 
-import com.team.bytedancewaterfall.data.entity.FeedItem;
+import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 
 import java.util.List;
 
@@ -13,4 +13,6 @@ public interface FeedService {
     boolean removeFeedItem(String id);
     // 更新瀑布流数据
     boolean updateFeedItem(FeedItem feedItem);
+    // 查询某个tag标签的数据
+    List<FeedItem> getFeedListByTag(String tag);
 }

@@ -1,4 +1,4 @@
-package com.team.bytedancewaterfall.data.entity;
+package com.team.bytedancewaterfall.data.pojo.entity;
 
 public class LoginUser {
     private String username;

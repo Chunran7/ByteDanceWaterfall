@@ -1,4 +1,4 @@
-package com.team.bytedancewaterfall.data.entity;
+package com.team.bytedancewaterfall.data.pojo.entity;
 
 import java.io.Serializable;
 import java.util.List;
@@ -106,5 +106,19 @@ public class FeedItem implements Serializable {
 
     public void setVideoUrl(String videoUrl) {
         this.videoUrl = videoUrl;
+    }
+
+    @Override
+    public String toString() {
+        return "FeedItem{" +
+                "id='" + id + '\'' +
+                ", type=" + type +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", price='" + price + '\'' +
+                ", tags=" + tags +
+                ", videoUrl='" + videoUrl + '\'' +
+                '}';
     }
 }
