@@ -52,4 +52,6 @@ dependencies {
     implementation("cn.javaex:htool-core:1.3.4")
     // https://mvnrepository.com/artifact/org.projectlombok/lombok
     implementation("org.projectlombok:lombok:1.18.24")
+// https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2-extension
+    implementation("com.alibaba.fastjson2:fastjson2-extension:2.0.15.android")
 }

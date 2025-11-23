@@ -1,5 +1,7 @@
 package com.team.bytedancewaterfall.data.service;
 
+import android.content.Context;
+
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 
 import java.util.List;
@@ -17,4 +19,5 @@ public interface FeedService {
     List<FeedItem> getFeedListByTag(String tag);
     // 分页查询 page为第几页，size为每页大小
     List<FeedItem> pageQueryFeedList(Integer page, Integer size);
+    List<FeedItem> getFeedList(Context context);
 }

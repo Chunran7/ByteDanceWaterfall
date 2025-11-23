@@ -1,9 +1,11 @@
 package com.team.bytedancewaterfall.data.service.impl;
 
+import android.content.Context;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
+import com.team.bytedancewaterfall.data.database.FeedItemDatabaseHelper;
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 import com.team.bytedancewaterfall.data.service.FeedService;
 import com.team.bytedancewaterfall.data.vurtualData.FeedItemData;
@@ -19,7 +21,12 @@ public class FeedServiceImpl implements FeedService {
         // TODO 暂时采用本地虚拟数据
         return FeedItemData.getFeedItemList();
     }
-
+    public List<FeedItem> getFeedList(Context context) {
+        FeedItemDatabaseHelper dbHelper = new FeedItemDatabaseHelper(context);
+        List<FeedItem> feedItems = dbHelper.getAllFeedItems();
+        // TODO 暂时采用本地虚拟数据
+        return feedItems;
+    }
     @Override
     public boolean addFeedItem(FeedItem feedItem) {
         if (StringUtils.isNotEmpty(feedItem.getId())) {
