@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.team.bytedancewaterfall.adapter.FeedAdapter
 import com.team.bytedancewaterfall.data.Repository
+import com.team.bytedancewaterfall.data.service.FeedService
+import com.team.bytedancewaterfall.data.service.impl.FeedServiceImpl
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,5 +27,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         val adapter = FeedAdapter(Repository.getMockData())
         recyclerView.adapter = adapter
+        val feedService: FeedService = FeedServiceImpl()
+        val feedList = feedService.getFeedList()
     }
 }
