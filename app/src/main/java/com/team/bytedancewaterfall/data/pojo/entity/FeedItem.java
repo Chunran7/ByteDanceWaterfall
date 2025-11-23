@@ -42,8 +42,17 @@ public class FeedItem implements Serializable {
         this.type = type;
         this.imageUrl = imageUrl;
         this.title = title;
+        this.description = description;
+        this.price = price;
+        this.tags = tags;
+        this.videoUrl = videoUrl;
     }
-
+    public FeedItem(String id, int type, String imageUrl, String title){
+        this.id = id;
+        this.type = type;
+        this.imageUrl = imageUrl;
+        this.title = title;
+    }
     public String getId() {
         return id;
     }
