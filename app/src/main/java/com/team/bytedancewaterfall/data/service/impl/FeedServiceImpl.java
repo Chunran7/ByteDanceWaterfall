@@ -54,4 +54,25 @@ public class FeedServiceImpl implements FeedService {
                 .filter(item -> item.getTags().contains(tag))
                 .toList();
     }
+
+    @Override
+    public List<FeedItem> pageQueryFeedList(Integer page, Integer size) {
+        if (page == null || page < 1) {
+            page = 1;
+        }
+        if (size == null || size < 1) {
+            size = 10;
+        }
+        // 开始的数据条数
+        int begin = (page - 1) * size;
+        if (begin > FeedItemData.getFeedItemList().size()) {
+            // 超过数据范围
+            return Collections.emptyList();
+        }
+        if (begin + size <= FeedItemData.getFeedItemList().size()) {
+            // 获取指定范围内的数据
+            return FeedItemData.getFeedItemList().subList(begin, begin + size);
+        }
+        return Collections.emptyList();
+    }
 }
