@@ -2,6 +2,7 @@ package com.team.bytedancewaterfall.data.service.impl;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -27,6 +28,18 @@ public class FeedServiceImpl implements FeedService {
         // TODO 暂时采用本地虚拟数据
         return feedItems;
     }
+
+    @Override
+    public boolean addFeedItem(Context context, FeedItem feedItem) {
+        if (feedItem == null) {
+            // 没有插入对象
+            Log.e("FeedServiceImpl", "addFeedItem: 插入对象为空");
+            return false;
+        }
+        FeedItemDatabaseHelper dbHelper = new FeedItemDatabaseHelper(context);
+        return dbHelper.insertFeedItem(feedItem);
+    }
+
     @Override
     public boolean addFeedItem(FeedItem feedItem) {
         if (StringUtils.isNotEmpty(feedItem.getId())) {

@@ -1,5 +1,9 @@
 package com.team.bytedancewaterfall.data.pojo.entity;
 
+import android.content.ContentValues;
+
+import com.alibaba.fastjson2.JSON;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -129,5 +133,22 @@ public class FeedItem implements Serializable {
                 ", tags=" + tags +
                 ", videoUrl='" + videoUrl + '\'' +
                 '}';
+    }
+
+    /**
+     * 转换为ContentValues，用于插入数据
+     * @return
+     */
+    public ContentValues toContentValues() {
+        ContentValues values = new ContentValues();
+        values.put("id", id);
+        values.put("type", type);
+        values.put("imageUrl", imageUrl);
+        values.put("title", title);
+        values.put("description", description);
+        values.put("price", price);
+        values.put("tags", JSON.toJSONString(tags));
+        values.put("videoUrl", videoUrl);
+        return values;
     }
 }

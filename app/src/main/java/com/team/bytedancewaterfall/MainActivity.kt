@@ -1,6 +1,7 @@
 package com.team.bytedancewaterfall
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         val feedService: FeedService = FeedServiceImpl()
         val feedList: List<FeedItem> = feedService.getFeedList(this)
         for (feedItem in feedList){
-            print(feedItem)
+            Log.d("MainActivity", "feedItem: $feedItem")
         }
 
     }

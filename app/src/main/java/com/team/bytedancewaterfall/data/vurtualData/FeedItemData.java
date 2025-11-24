@@ -10,6 +10,8 @@ import android.util.Log;
 import com.alibaba.fastjson2.JSON;
 import com.team.bytedancewaterfall.data.database.FeedItemDatabaseHelper;
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
+import com.team.bytedancewaterfall.data.service.FeedService;
+import com.team.bytedancewaterfall.data.service.impl.FeedServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,19 +71,19 @@ public class FeedItemData {
         SQLiteDatabase db = null;
         try {
             db = dbHelper.getWritableDatabase(); // 这会触发 onCreate 如果数据库不存在
+            // 检查是否已经有数据，避免重复插入
             int count = dbHelper.getCount();
+            addTest(context);
             if (count > 0) {
                 Log.d(TAG, "Database already exists. Skipping initialization.");
                 return;
             }
-            // 检查是否已经有数据，避免重复插入
             // 这里简化处理，每次启动都清空并重新插入
             // 实际项目中应根据需求判断是否需要清空
 //            db.delete(FeedItemDatabaseHelper.TABLE_NOTES, null, null);
             db.beginTransaction();
             try {
                 for (FeedItem item : feedItemList) {
-
                     ContentValues values = new ContentValues();
                     values.put("id", item.getId());
                     values.put("type", item.getType());
@@ -110,5 +112,18 @@ public class FeedItemData {
                 db.close();
             }
         }
+    }
+    public static void addTest(Context context) {
+        FeedItem feedItem = new FeedItem();
+        feedItem.setId(UUID.randomUUID().toString());
+        feedItem.setType(0);
+        feedItem.setImageUrl("https://picsum.photos/id/10/300/400");
+        feedItem.setTitle("Stylish Watch");
+        feedItem.setDescription("A very stylish watch for modern people.");
+        feedItem.setPrice("$99.99");
+        feedItem.setTags(Arrays.asList("Fashion", "Accessory", "Men's Style"));
+        FeedService feedService = new FeedServiceImpl();
+        boolean res = feedService.addFeedItem(context, feedItem);
+        System.out.println(feedItem.getId()+"addTest:"+ res);
     }
 }

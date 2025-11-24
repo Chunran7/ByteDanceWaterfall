@@ -19,5 +19,8 @@ public interface FeedService {
     List<FeedItem> getFeedListByTag(String tag);
     // 分页查询 page为第几页，size为每页大小
     List<FeedItem> pageQueryFeedList(Integer page, Integer size);
+    // 本地数据库查询数据
     List<FeedItem> getFeedList(Context context);
+    // 本地数据库添加数据
+    boolean addFeedItem(Context context,FeedItem feedItem);
 }

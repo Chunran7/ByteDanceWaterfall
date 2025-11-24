@@ -1,15 +1,19 @@
 package com.team.bytedancewaterfall.data.database;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.alibaba.fastjson2.JSON;
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "feed_item.db";
@@ -84,7 +88,9 @@ public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
         }
         return feedItems;
     }
-    // 查询数据库表数据量
+    /**
+     * 查询数据库表数据量
+     */
     public int getCount() {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_NOTES, null);
@@ -92,5 +98,30 @@ public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
         int count = cursor.getInt(0);
         cursor.close();
         return count;
+    }
+    /**
+     * 本地数据库插入数据
+     */
+    public boolean insertFeedItem(FeedItem feedItem) {
+        if (feedItem == null) {
+            // 数据为空，插入失败
+            return false;
+        }
+        if (feedItem.getId() == null) {
+            // id为空，自定义id
+            feedItem.setId(UUID.randomUUID().toString());
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        long insNum = 0l;
+        try {
+            insNum = db.insert(TABLE_NOTES, null, feedItem.toContentValues());
+        }
+        catch (Exception e) {
+            Log.e(TAG, "Error inserting feed item", e);
+        }finally {
+            db.endTransaction();
+        }
+        return insNum > 0;
     }
 }
