@@ -5,6 +5,7 @@ import android.content.Context;
 import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
 
 import com.team.bytedancewaterfall.R;
 
@@ -125,7 +126,7 @@ public class PublicMediaStorageManager {
                 new String[]{mimeType},
                 (path, uri) -> {
                     // 扫描完成后的回调（uri 是系统分配的 Content Uri，可用于渲染/分享）
-                    android.util.Log.d("PublicStorage", "文件扫描成功，Uri：" + uri);
+                    Log.d("PublicStorage", "文件扫描成功，Uri：" + uri);
                 }
         );
 
