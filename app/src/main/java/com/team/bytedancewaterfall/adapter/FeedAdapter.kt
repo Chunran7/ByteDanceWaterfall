@@ -7,7 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.team.bytedancewaterfall.R
-import com.team.bytedancewaterfall.data.FeedItem
+import com.team.bytedancewaterfall.data.pojo.entity.FeedItem
 
 class FeedAdapter(private val items: List<FeedItem>) : RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
 

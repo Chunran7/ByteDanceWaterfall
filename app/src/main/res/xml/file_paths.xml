@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 配置 DCIM 目录下的应用专属文件夹 -->
+    <external-path
+        name="external_dcim"
+        path="DCIM/ByteDanceWaterfall/" /> <!-- 与 APP_DIR_NAME 一致 -->
+
+    <!-- 配置 Movies 目录下的应用专属文件夹 -->
+    <external-path
+        name="external_movies"
+        path="Movies/ByteDanceWaterfall/" /> <!-- 与 APP_DIR_NAME 一致 -->
+</paths>

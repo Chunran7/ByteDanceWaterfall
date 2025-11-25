@@ -1,4 +1,4 @@
-package com.team.bytedancewaterfall
+package com.team.bytedancewaterfall.activity
 
 import android.os.Bundle
 import android.util.Log
@@ -8,14 +8,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.team.bytedancewaterfall.R
 import com.team.bytedancewaterfall.adapter.FeedAdapter
-import com.team.bytedancewaterfall.data.Repository
-import com.team.bytedancewaterfall.data.database.FeedItemDatabaseHelper
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem
 import com.team.bytedancewaterfall.data.service.FeedService
 import com.team.bytedancewaterfall.data.service.impl.FeedServiceImpl
 import com.team.bytedancewaterfall.data.vurtualData.FeedItemData
-
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,9 +27,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        val adapter = FeedAdapter(Repository.getMockData())
-        recyclerView.adapter = adapter
+        recyclerView.layoutManager =
+            StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 /*
         // 在 MainActivity.java 或 Application 类中
         val dbHelper = FeedItemDatabaseHelper(this)
