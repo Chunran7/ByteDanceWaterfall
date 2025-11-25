@@ -17,6 +17,20 @@ import java.util.List;
 import cn.javaex.htool.core.string.StringUtils;
 
 public class FeedServiceImpl implements FeedService {
+    private static FeedServiceImpl instance;
+    public static FeedServiceImpl getInstance() {
+        if (instance == null) {
+            synchronized (FeedServiceImpl.class) {
+                if (instance == null) {
+                    instance = new FeedServiceImpl();
+                }
+            }
+        }
+        return instance;
+    }
+    private FeedServiceImpl(){
+
+    }
     @Override
     public List<FeedItem> getFeedList() {
         // TODO 暂时采用本地虚拟数据
@@ -25,7 +39,6 @@ public class FeedServiceImpl implements FeedService {
     public List<FeedItem> getFeedList(Context context) {
         FeedItemDatabaseHelper dbHelper = new FeedItemDatabaseHelper(context);
         List<FeedItem> feedItems = dbHelper.getAllFeedItems();
-        // TODO 暂时采用本地虚拟数据
         return feedItems;
     }
 

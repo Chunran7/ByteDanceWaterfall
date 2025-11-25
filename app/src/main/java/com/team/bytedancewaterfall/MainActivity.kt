@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         val db = dbHelper.getWritableDatabase() // 触发数据库创建*/
         // 初始化数据库
         FeedItemData.initDatabase(this);
-        val feedService: FeedService = FeedServiceImpl()
+        val feedService: FeedService = FeedServiceImpl.getInstance()
         val feedList: List<FeedItem> = feedService.getFeedList(this)
         for (feedItem in feedList){
             Log.d("MainActivity", "feedItem: $feedItem")
