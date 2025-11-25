@@ -23,4 +23,12 @@ public interface FeedService {
     List<FeedItem> getFeedList(Context context);
     // 本地数据库添加数据
     boolean addFeedItem(Context context,FeedItem feedItem);
+    // 本地数据库删除数据
+    boolean removeFeedItem(Context context, List<String> ids);
+    // 本地数据库更新数据
+    boolean updateFeedItem(Context context,FeedItem feedItem);
+    // 根据id查询FeedItem
+    FeedItem getFeedItemById(Context context,String id);
+    // 本地分页查询
+    List<FeedItem> pageQueryFeedList(Context context,Integer page, Integer size);
 }

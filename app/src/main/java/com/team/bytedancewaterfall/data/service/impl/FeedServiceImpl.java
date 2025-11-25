@@ -54,6 +54,45 @@ public class FeedServiceImpl implements FeedService {
     }
 
     @Override
+    public boolean removeFeedItem(Context context, List<String> ids) {
+        if (ids != null && !ids.isEmpty()) {
+            FeedItemDatabaseHelper dbHelper = new FeedItemDatabaseHelper(context);
+            return dbHelper.deleteById(ids);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean updateFeedItem(Context context, FeedItem feedItem) {
+        if (feedItem != null && StringUtils.isNotEmpty(feedItem.getId())) {
+            FeedItemDatabaseHelper dbHelper = new FeedItemDatabaseHelper(context);
+            return dbHelper.updateFeedItem(feedItem);
+        }
+        return false;
+    }
+
+    @Override
+    public FeedItem getFeedItemById(Context context, String id) {
+        if (StringUtils.isNotEmpty(id)) {
+            FeedItemDatabaseHelper dbHelper = new FeedItemDatabaseHelper(context);
+            return dbHelper.getFeedItemById(id);
+        }
+        return null;
+    }
+
+    @Override
+    public List<FeedItem> pageQueryFeedList(Context context, Integer page, Integer size) {
+        if (page == null || page < 1) {
+            page = 1;
+        }
+        if (size == null || size < 1) {
+            size = 10;
+        }
+        FeedItemDatabaseHelper dbHelper = new FeedItemDatabaseHelper(context);
+        return dbHelper.pageQueryFeedList(page, size);
+    }
+
+    @Override
     public boolean addFeedItem(FeedItem feedItem) {
         if (StringUtils.isNotEmpty(feedItem.getId())) {
             return FeedItemData.addFeedItem(feedItem);
