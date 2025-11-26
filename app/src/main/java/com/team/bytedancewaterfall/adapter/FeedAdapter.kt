@@ -17,6 +17,23 @@ import com.team.bytedancewaterfall.data.pojo.entity.FeedItem
 class FeedAdapter(private val feedItems: List<FeedItem>) :
     RecyclerView.Adapter<FeedAdapter.ProductViewHolder>() {
 
+    // 点击事件监听器
+    private var onItemClickListener: OnItemClickListener? = null
+
+    /**
+     * 点击事件监听接口
+     */
+    interface OnItemClickListener {
+        fun onItemClick(position: Int, feedItem: FeedItem)
+    }
+
+    /**
+     * 设置点击事件监听器
+     */
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        this.onItemClickListener = listener
+    }
+
     /**
      * 产品卡片类型的ViewHolder内部类
      * 它持有将被填充数据的视图组件引用
@@ -72,6 +89,11 @@ class FeedAdapter(private val feedItems: List<FeedItem>) :
         } else {
             // 如果价格为空，则隐藏价格控件
             holder.price.visibility = View.GONE
+        }
+
+        // 设置点击事件
+        holder.itemView.setOnClickListener {
+            onItemClickListener?.onItemClick(position, item)
         }
     }
 

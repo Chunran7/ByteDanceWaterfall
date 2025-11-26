@@ -34,6 +34,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.BaseActivity"/>
+        <activity android:name=".activity.DetailActivity"/>
         <activity android:name=".activity.TestMediaUploadActivity"/>
         <activity android:name=".activity.MediaUploadActivity"
             android:exported="true"/>
