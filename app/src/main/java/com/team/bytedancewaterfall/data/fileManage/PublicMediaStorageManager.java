@@ -6,9 +6,6 @@ import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
-
-import com.team.bytedancewaterfall.R;
-
 import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
