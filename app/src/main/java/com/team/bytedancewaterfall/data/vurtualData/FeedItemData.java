@@ -15,7 +15,6 @@ import com.team.bytedancewaterfall.R;
 import com.team.bytedancewaterfall.data.database.FeedItemDatabaseHelper;
 import com.team.bytedancewaterfall.data.fileManage.PrivateMediaStorageManager;
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
-import com.team.bytedancewaterfall.data.service.FeedService;
 //import com.team.bytedancewaterfall.data.service.impl.FeedServiceImpl;
 
 import java.io.File;
@@ -40,6 +39,9 @@ public class FeedItemData {
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test_4, "City at Night", (String)null, (String)null, Arrays.asList("Cityscape", "Night", "Urban"), null));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test_5, "Delicious Food", "Best pasta I've ever had!", null, Arrays.asList("Food", "Recipe", "Italian"), null));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_6, "A Very Long Title That Is Meant to Wrap Around to Multiple Lines", null, "$12.00", null, null));
+        // 视频数据初始化
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 2, null, "席梦思床垫", "美式复古皮艺床软包床头双人床现代简约卧室家具收纳大床床头柜", "￥2000.00", Arrays.asList("家具", "床垫"),"drawable://"+R.raw.video_test_1));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 2, "drawable://"+R.drawable.test_11, "意式极简布艺沙发", "意式极简布艺沙发弧形客厅大户型别墅设计师异形转角海盐沙发原创", "￥1500.00", Arrays.asList("家具", "沙发"),"drawable://"+R.raw.video_test_2));
 //        feedItemList.forEach(System.out::println);
     }
     public static List<FeedItem> getFeedItemList() {
@@ -99,7 +101,7 @@ public class FeedItemData {
                     if (item.getImageUrl() == null) {
                         values.put("imageUrl", item.getImageUrl());
                     }else {
-                        values.put("imageUrl", copyFileToPrivateDirByType(context, item.getImageUrl(), "image"));
+                        values.put("imageUrl", copyFileToPrivateDirByType(context, item.getImageUrl(), "image", 0));
                     }
                     values.put("title", item.getTitle());
                     values.put("description", item.getDescription());
@@ -109,7 +111,7 @@ public class FeedItemData {
                     if (item.getVideoUrl() == null) {
                         values.put("videoUrl", item.getVideoUrl());
                     }else {
-                        values.put("videoUrl", copyFileToPrivateDirByType(context, item.getVideoUrl(), "video"));
+                        values.put("videoUrl", copyFileToPrivateDirByType(context, item.getVideoUrl(), "video", 1));
                     }
                     long result = db.insert(FeedItemDatabaseHelper.TABLE_NOTES, null, values);
                     if (result == -1) {
@@ -134,9 +136,10 @@ public class FeedItemData {
      * @param context 上下文对象
      * @param drawableResId drawable资源ID
      * @param subDir 子目录名称（可选）
+     * @param type 文件类型 0为图片，1为视频
      * @return 成功时返回私有目录中的文件路径，失败返回null
      */
-    public static String copyDrawableToPrivateDir(Context context, int drawableResId, String subDir) {
+    public static String copyDrawableToPrivateDir(Context context, int drawableResId, String subDir, int type) {
         if (drawableResId <= 0) {
             Log.e(TAG, "无效的drawable资源ID");
             return null;
@@ -145,14 +148,23 @@ public class FeedItemData {
         try {
             // 获取drawable资源的输入流
             inputStream = context.getResources().openRawResource(drawableResId);
-
-            // 保存为PNG格式图片到私有目录
-            String resultPath = PrivateMediaStorageManager.savePngImageToPrivateDir(
-                    context,
-                    inputStream,
-                    subDir
-            );
-
+            String resultPath = null;
+            if (type == 0) {
+                // 保存为PNG格式图片到私有目录
+                resultPath = PrivateMediaStorageManager.savePngImageToPrivateDir(
+                        context,
+                        inputStream,
+                        subDir
+                );
+            }
+            if (type == 1) {
+                // 保存为MP4格式视频到私有目录
+                resultPath = PrivateMediaStorageManager.saveVideoToPrivateDir(
+                        context,
+                        inputStream,
+                        subDir
+                );
+            }
             inputStream.close();
             Log.d(TAG, "Drawable资源复制成功: " + resultPath);
             return resultPath;
@@ -177,9 +189,10 @@ public class FeedItemData {
      * @param context 上下文对象
      * @param sourceFilePath 源文件路径或资源标识
      * @param subDir 子目录名称（可选）
+     * @param type 文件类型 0为图片，1为视频
      * @return 成功时返回私有目录中的文件路径，失败返回null
      */
-    public static String copyFileToPrivateDirByType(Context context, String sourceFilePath, String subDir) {
+    public static String copyFileToPrivateDirByType(Context context, String sourceFilePath, String subDir, Integer type) {
         if (sourceFilePath == null || sourceFilePath.isEmpty()) {
             Log.e(TAG, "源文件路径为空");
             return null;
@@ -190,7 +203,7 @@ public class FeedItemData {
             try {
                 String resourceIdStr = sourceFilePath.substring("drawable://".length());
                 int resourceId = Integer.parseInt(resourceIdStr);
-                return copyDrawableToPrivateDir(context, resourceId, subDir);
+                return copyDrawableToPrivateDir(context, resourceId, subDir, type);
             } catch (Exception e) {
                 Log.e(TAG, "解析drawable资源ID失败: " + sourceFilePath, e);
                 return null;
@@ -244,18 +257,4 @@ public class FeedItemData {
             return null;
         }
     }
-
-    /*public static void addTest(Context context) {
-        FeedItem feedItem = new FeedItem();
-        feedItem.setId(UUID.randomUUID().toString());
-        feedItem.setType(0);
-        feedItem.setImageUrl("https://picsum.photos/id/10/300/400");
-        feedItem.setTitle("Stylish Watch");
-        feedItem.setDescription("A very stylish watch for modern people.");
-        feedItem.setPrice("$99.99");
-        feedItem.setTags(Arrays.asList("Fashion", "Accessory", "Men's Style"));
-        FeedService feedService = FeedServiceImpl.getInstance();
-        boolean res = feedService.addFeedItem(context, feedItem);
-        System.out.println(feedItem.getId()+"addTest:"+ res);
-    }*/
 }
