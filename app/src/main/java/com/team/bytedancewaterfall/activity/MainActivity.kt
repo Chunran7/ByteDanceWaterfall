@@ -40,6 +40,9 @@ class MainActivity : AppCompatActivity() {
         for (feedItem in feedList){
             Log.d("MainActivity", "feedItem: $feedItem")
         }
-
+        
+        // 设置适配器，展示卡片
+        val adapter = FeedAdapter(feedList)
+        recyclerView.adapter = adapter
     }
 }
