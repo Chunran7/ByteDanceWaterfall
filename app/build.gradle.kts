@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
+    id("kotlin-kapt")
 }
 
 android {
@@ -51,7 +52,12 @@ dependencies {
     // https://mvnrepository.com/artifact/cn.javaex/htool-core
     implementation("cn.javaex:htool-core:1.3.4")
     // https://mvnrepository.com/artifact/org.projectlombok/lombok
-    implementation("org.projectlombok:lombok:1.18.24")
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    kapt("org.projectlombok:lombok:1.18.32")
 // https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2-extension
     implementation("com.alibaba.fastjson2:fastjson2-extension:2.0.15.android")
+
+    // Glide for image loading
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
 }
