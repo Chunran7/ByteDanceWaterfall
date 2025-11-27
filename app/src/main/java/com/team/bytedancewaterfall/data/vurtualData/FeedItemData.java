@@ -15,7 +15,6 @@ import com.team.bytedancewaterfall.R;
 import com.team.bytedancewaterfall.data.database.FeedItemDatabaseHelper;
 import com.team.bytedancewaterfall.data.fileManage.PrivateMediaStorageManager;
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
-//import com.team.bytedancewaterfall.data.service.impl.FeedServiceImpl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,18 +32,30 @@ public class FeedItemData {
     public static List<FeedItem> feedItemList;
     static{
         feedItemList = new ArrayList<>();
-        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_1, "Stylish Watch", "A very stylish watch for modern people.", "$99.99", Arrays.asList("Fashion", "Accessory", "Men's Style"), null));
-        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test_2, "Beautiful Landscape", "Captured this amazing view during my trip.", null, Arrays.asList("Travel", "Nature", "Photography"), null));
-        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_3, "Comfortable Shoes", "Perfect for running and daily activities.", "$75.50", Arrays.asList("Sports", "Running"), null));
-        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test_4, "City at Night", (String)null, (String)null, Arrays.asList("Cityscape", "Night", "Urban"), null));
-        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test_5, "Delicious Food", "Best pasta I've ever had!", null, Arrays.asList("Food", "Recipe", "Italian"), null));
-        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_6, "A Very Long Title That Is Meant to Wrap Around to Multiple Lines", null, "$12.00", null, null));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test1_0, "陶瓷水杯", "精品套餐水杯，泡茶接待客人使用", "19.90", Arrays.asList("陶瓷", "杯子"), null));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test1_1, "保温杯", "保温杯定制印logo开业宣传广告杯子公司员工活动纪念礼品水杯刻字", "19.80", Arrays.asList("保温", "水杯", "不锈钢"), null));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test1_2, "双层玻璃杯", "定制广告杯子双层玻璃杯赠品水杯印字保温杯定做礼品杯印logo茶杯", "9.90", Arrays.asList("定制logo", "水杯", "双层玻璃"), null));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test1_3, "健身运动水杯", "Tritan吨桶吨大容量水杯男运动健身2025年新款水壶耐高温大号杯子", "29.90", Arrays.asList("PC材质", "大容量水杯", "可拆卸吸管"), null));
+
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test_2, "台灯", "宿舍可用暖色光台灯，可充电使用", "49.99", Arrays.asList("台灯", "500mhA容量", "多模式"), null));
+
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_3, "办公打印套装", "A4纸+订书机套装，先打印再装订，完美契合", "25.50", Arrays.asList("A4纸", "订书机", "办公用品"), null));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 2, null, "席梦思床垫", "美式复古皮艺床软包床头双人床现代简约卧室家具收纳大床床头柜", "2000.00", Arrays.asList("家具", "床垫"),"drawable://"+R.raw.video_test_1));
+
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test_4, "电动牙刷", "最新科技电动牙刷，送配套漱口水杯", "69.90", Arrays.asList("牙刷", "全自动", "牙齿清洁"), null));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test_5, "抑菌科技毛巾", "100%新疆棉，5A级抑菌毛巾洗脸巾，3条装", "29.9", Arrays.asList("毛巾", "纯棉", "抑菌"), null));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_6, "居家拖鞋", "踩屎感凉拖鞋，夏季款可外穿", "15.00", Arrays.asList("拖鞋", "凉爽"), null));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test_7, "笔记本", "皮革面商务笔记本，2025新款，书写流畅", "15.00", Arrays.asList("办公", "笔记本", "商务"), null));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 2, "drawable://"+R.drawable.test_11, "意式极简布艺沙发", "意式极简布艺沙发弧形客厅大户型别墅设计师异形转角海盐沙发原创", "1500.00", Arrays.asList("家具", "沙发"),"drawable://"+R.raw.video_test_2));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_8, "高颜值双肩大容量背包", "双肩包男士背包大容量电脑包通勤出差休闲旅行包防水轻便书包，2025新款", "119.00", Arrays.asList("双肩包", "大容量", "轻便"), null));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_9, "全自动雨伞加大加厚加固晴雨两用", "全自动雨伞加大加厚加固晴雨两用男士折叠女太阳男生自动伞定制，2025新款", "39.90", Arrays.asList("雨伞", "全自动", "可折叠"), null));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_10, "可爱猫猫书包挂件", "金属钥匙扣挂件定制logo企业周年校庆纪念礼品定做文创景区钥匙链订制", "9.90", Arrays.asList("挂件", "可定制", "文创"), null));
+
         // 视频数据初始化
-        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 2, null, "席梦思床垫", "美式复古皮艺床软包床头双人床现代简约卧室家具收纳大床床头柜", "￥2000.00", Arrays.asList("家具", "床垫"),"drawable://"+R.raw.video_test_1));
-        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 2, "drawable://"+R.drawable.test_11, "意式极简布艺沙发", "意式极简布艺沙发弧形客厅大户型别墅设计师异形转角海盐沙发原创", "￥1500.00", Arrays.asList("家具", "沙发"),"drawable://"+R.raw.video_test_2));
-//        feedItemList.forEach(System.out::println);
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 2, "drawable://"+R.drawable.test2_1, "大疆Action 6", "DJI大疆 Action6 新品运动相机骑行潜水旅游挂脖防抖vlog户外", "2999.00", Arrays.asList("大疆DJ", "相机", "运动"),"drawable://"+R.raw.video_dj_3));
+
     }
-    public static List<FeedItem> getFeedItemList() {
+   /* public static List<FeedItem> getFeedItemList() {
         return feedItemList;
     }
     public static boolean addFeedItem(FeedItem feedItem) {
@@ -74,7 +85,7 @@ public class FeedItemData {
             }
         }
         return false;
-    }
+    }*/
 
     // 提供一个方法，在应用启动时由拥有 Context 的组件调用
     public static void initDatabase(Context context) {

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/upload_media_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="上传媒体文件"
+        android:textSize="16sp" />
+
+    <ImageView
+        android:id="@+id/preview_image"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="16dp"
+        android:background="#E0E0E0"
+        android:scaleType="centerCrop"
+        android:contentDescription="媒体预览" />
+
+    <TextView
+        android:id="@+id/media_type_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="媒体类型: 未选择"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/result_path_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="存储路径: 未选择文件"
+        android:textSize="14sp"
+        android:background="#F5F5F5"
+        android:padding="8dp"
+        android:maxLines="5"
+        android:scrollbars="vertical" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="说明:\n点击上方按钮启动媒体上传Activity\n可以选择拍照、录像或从相册选择\n上传完成后会返回文件存储路径"
+        android:textSize="12sp"
+        android:textColor="#666666" />
+
+</LinearLayout>

@@ -31,11 +31,11 @@ public class FeedServiceImpl implements FeedService {
     private FeedServiceImpl(){
 
     }
-    @Override
+/*    @Override
     public List<FeedItem> getFeedList() {
         // TODO 暂时采用本地虚拟数据
         return FeedItemData.getFeedItemList();
-    }
+    }*/
     public List<FeedItem> getFeedList(Context context) {
         FeedItemDatabaseHelper dbHelper = new FeedItemDatabaseHelper(context);
         List<FeedItem> feedItems = dbHelper.getAllFeedItems();
@@ -92,7 +92,7 @@ public class FeedServiceImpl implements FeedService {
         return dbHelper.pageQueryFeedList(page, size);
     }
 
-    @Override
+   /* @Override
     public boolean addFeedItem(FeedItem feedItem) {
         if (StringUtils.isNotEmpty(feedItem.getId())) {
             return FeedItemData.addFeedItem(feedItem);
@@ -146,5 +146,5 @@ public class FeedServiceImpl implements FeedService {
             return FeedItemData.getFeedItemList().subList(begin, begin + size);
         }
         return Collections.emptyList();
-    }
+    }*/
 }
