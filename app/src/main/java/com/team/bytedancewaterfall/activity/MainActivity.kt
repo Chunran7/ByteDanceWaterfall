@@ -33,69 +33,49 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var progressBar: ProgressBar
 
-    // 数据相关
+    // 数据与适配器
     private lateinit var feedService: FeedService
     private lateinit var feedAdapter: FeedAdapter
     private lateinit var layoutManager: StaggeredGridLayoutManager
     private val feedList = mutableListOf<FeedItem>()
 
-    // 用于模拟异步加载的Handler
+    // 状态控制
     private val handler = Handler(Looper.getMainLooper())
-
-    // 加载状态标志
-    private var isLoadingMore = false
-
-    // 分页相关
-    private var currentPage = 1
-    private val pageSize = 4  // 每页4条数据
-    private var allData = listOf<FeedItem>()  // 存储所有数据
-    private var hasMoreData = true  // 是否还有更多数据
+    private var isLoading = false
+    private var hasMoreData = true
 
     companion object {
         private const val TAG = "MainActivity"
         private const val SPAN_COUNT = 2 // 默认双列布局
+        private const val PRELOAD_THRESHOLD = 5 // 预加载阈值：滑动到倒数第5个时加载更多
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        setupSystemUI()
+        initViews()
+        initDatabase()
+        setupRecyclerView()
+        setupSwipeRefresh()
+        fetchData(isRefresh = true, isInitialLoad = true) // 初始加载
+    }
 
-        // 处理系统栏边距
+    private fun setupSystemUI() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        // 初始化视图
-        initViews()
-
-        // 初始化数据库
-        initDatabase()
-
-        // 初始化RecyclerView
-        setupRecyclerView()
-
-        // 初始化下拉刷新
-        setupSwipeRefresh()
-
-        // 加载数据
-        loadData()
     }
 
-    /**
-     * 初始化所有视图组件
-     */
     private fun initViews() {
         recyclerView = findViewById(R.id.recyclerView)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         progressBar = findViewById(R.id.progressBar)
     }
 
-    /**
-     * 初始化数据库
-     */
     private fun initDatabase() {
         try {
             FeedItemData.initDatabase(this)
@@ -106,245 +86,126 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * 设置RecyclerView
-     * 包括LayoutManager、Adapter和异构布局处理
-     */
     private fun setupRecyclerView() {
-        // 初始化FeedService
         feedService = FeedServiceImpl.getInstance()
-
-        // 创建StaggeredGridLayoutManager（瀑布流布局管理器）
         layoutManager = StaggeredGridLayoutManager(SPAN_COUNT, StaggeredGridLayoutManager.VERTICAL)
-
-        // 设置LayoutManager
+        layoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
         recyclerView.layoutManager = layoutManager
 
-        // 创建Adapter并设置点击事件监听
+        // 使用 Lambda 表达式设置点击监听，代码更简洁
         feedAdapter = FeedAdapter(feedList)
         feedAdapter.setOnItemClickListener(object : FeedAdapter.OnItemClickListener {
             override fun onItemClick(position: Int, feedItem: FeedItem) {
                 handleItemClick(feedItem)
             }
         })
-
-        // 设置Adapter
         recyclerView.adapter = feedAdapter
 
-        // 添加滚动监听，实现上拉加载更多
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
+                if (dy <= 0) return // 只在向上滑动时检查
 
-                // 检查是否滚动到底部
-                if (!recyclerView.canScrollVertically(1) && dy > 0) {
-                    // 滚动到底部，加载更多数据
-                    loadMoreData()
+                val lastVisibleItemPositions = layoutManager.findLastVisibleItemPositions(null)
+                val lastVisibleItem = lastVisibleItemPositions.maxOrNull() ?: 0
+                val totalItemCount = layoutManager.itemCount
+
+                // 专业的预加载逻辑
+                if (!isLoading && hasMoreData && totalItemCount <= lastVisibleItem + PRELOAD_THRESHOLD) {
+                    fetchData(isRefresh = false)
+                }
+            }
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    // 停止滚动时，重新计算布局，防止卡片位置发生变化
+                    layoutManager.invalidateSpanAssignments()
                 }
             }
         })
     }
 
-    /**
-     * 设置下拉刷新
-     */
     private fun setupSwipeRefresh() {
-        // 设置刷新时的颜色
         swipeRefreshLayout.setColorSchemeResources(
             android.R.color.holo_blue_bright,
             android.R.color.holo_green_light,
             android.R.color.holo_orange_light,
             android.R.color.holo_red_light
         )
-
-        // 设置下拉刷新监听
         swipeRefreshLayout.setOnRefreshListener {
-            refreshData()
+            fetchData(isRefresh = true) // 下拉刷新
         }
     }
 
     /**
-     * 加载数据（首次加载）
+     * 统一的数据获取方法，整合了初始加载、刷新和加载更多
+     * @param isRefresh 是否为刷新操作 (清空列表)
+     * @param isInitialLoad 是否为首次加载 (用于控制中央加载条)
      */
-    private fun loadData() {
-        // 显示加载指示器
-        showLoading(true)
+    private fun fetchData(isRefresh: Boolean, isInitialLoad: Boolean = false) {
+        if (isLoading) return
+        isLoading = true
 
-        // 模拟异步加载数据
-        handler.postDelayed({
-            try {
-                // 从数据库获取所有数据
-                allData = feedService.getFeedList(this)
-
-                // 重置分页状态
-                currentPage = 1
-                feedList.clear()
-
-                // 加载第一页数据（前4条）
-                loadPageData()
-
-                // 打印日志
-                Log.d(TAG, "首次加载，总数据: ${allData.size} 条，当前显示: ${feedList.size} 条")
-
-            } catch (e: Exception) {
-                Log.e(TAG, "加载数据失败", e)
-                Toast.makeText(this, "加载数据失败", Toast.LENGTH_SHORT).show()
-            } finally {
-                // 隐藏加载指示器
-                showLoading(false)
-            }
-        }, 1000) // 延迟1秒模拟网络请求
-    }
-
-    /**
-     * 刷新数据（下拉刷新）
-     */
-    private fun refreshData() {
-        Log.d(TAG, "开始刷新数据")
-
-        // 模拟异步刷新
-        handler.postDelayed({
-            try {
-                // 重新获取所有数据
-                allData = feedService.getFeedList(this)
-
-                // 重置分页状态
-                currentPage = 1
-                feedList.clear()
-                hasMoreData = true
-
-                // 加载第一页数据
-                loadPageData()
-
-                Toast.makeText(this, "刷新成功", Toast.LENGTH_SHORT).show()
-                Log.d(TAG, "刷新完成，当前显示 ${feedList.size} 条数据")
-
-            } catch (e: Exception) {
-                Log.e(TAG, "刷新数据失败", e)
-                Toast.makeText(this, "刷新失败", Toast.LENGTH_SHORT).show()
-            } finally {
-                // 停止刷新动画
-                swipeRefreshLayout.isRefreshing = false
-            }
-        }, 1500) // 延迟1.5秒模拟网络请求
-    }
-
-    /**
-     * 加载更多数据（上拉加载）
-     */
-    private fun loadMoreData() {
-        // 如果正在加载或没有更多数据，则不加载
-        if (isLoadingMore || !hasMoreData) {
-            if (!hasMoreData) {
-                Toast.makeText(this, "已经到底了", Toast.LENGTH_SHORT).show()
-            }
-            return
+        if (isInitialLoad) {
+            progressBar.visibility = View.VISIBLE
+        }
+        if (isRefresh) {
+            hasMoreData = true // 刷新时重置状态
         }
 
-        isLoadingMore = true
-        Log.d(TAG, "加载更多数据，当前页: $currentPage")
+        Log.d(TAG, "开始获取数据, isRefresh: $isRefresh, isInitialLoad: $isInitialLoad")
 
-        // 显示正在加载提示
-        Toast.makeText(this, "正在加载", Toast.LENGTH_SHORT).show()
-
-        // 模拟异步加载更多数据
+        // 模拟网络延迟
         handler.postDelayed({
             try {
-                // 页码+1
-                currentPage++
-
-                // 加载下一页数据
-                loadPageData()
-
-                Log.d(TAG, "加载更多完成，当前显示 ${feedList.size} 条数据")
+                val newData = feedService.getFeedList(this)
+                if (newData.isNotEmpty()) {
+                    if (isRefresh) {
+                        val oldSize = feedList.size
+                        feedList.clear()
+                        feedAdapter.notifyItemRangeRemoved(0, oldSize)
+                        feedList.addAll(newData)
+                        feedAdapter.notifyItemRangeInserted(0, newData.size)
+                        recyclerView.scrollToPosition(0) // 刷新后滚动到顶部
+                        Log.d(TAG, "刷新完成，共 ${newData.size} 条")
+                    } else {
+                        val oldSize = feedList.size
+                        feedList.addAll(newData)
+                        feedAdapter.notifyItemRangeInserted(oldSize, newData.size)
+                        Log.d(TAG, "加载更多完成, 新增 ${newData.size} 条")
+                    }
+                } else {
+                    if (!isRefresh) {
+                        hasMoreData = false
+                        Toast.makeText(this, "已经到底了", Toast.LENGTH_SHORT).show()
+                        Log.d(TAG, "没有更多数据了")
+                    }
+                }
             } catch (e: Exception) {
-                Log.e(TAG, "加载更多失败", e)
-                Toast.makeText(this, "加载失败", Toast.LENGTH_SHORT).show()
-                currentPage-- // 失败时回退页码
+                Log.e(TAG, "获取数据失败", e)
+                Toast.makeText(this, "获取数据失败", Toast.LENGTH_SHORT).show()
             } finally {
-                isLoadingMore = false
+                isLoading = false
+                if (isInitialLoad) {
+                    progressBar.visibility = View.GONE
+                }
+                if (swipeRefreshLayout.isRefreshing) {
+                    swipeRefreshLayout.isRefreshing = false
+                }
             }
-        }, 1000) // 延迟1秒模拟网络请求
+        }, 1200)
     }
 
-    /**
-     * 加载指定页的数据
-     */
-    private fun loadPageData() {
-        // 计算起始和结束索引
-        val startIndex = (currentPage - 1) * pageSize
-        val endIndex = minOf(startIndex + pageSize, allData.size)
-
-        // 检查是否还有更多数据
-        hasMoreData = endIndex < allData.size
-
-        if (startIndex < allData.size) {
-            // 获取当前页的数据
-            val pageData = allData.subList(startIndex, endIndex)
-
-            // 添加到显示列表
-            val oldSize = feedList.size
-            feedList.addAll(pageData)
-
-            // 通知适配器数据变化
-            if (currentPage == 1) {
-                // 首次加载，刷新全部
-                feedAdapter.notifyDataSetChanged()
-            } else {
-                // 加载更多，只刷新新增部分
-                feedAdapter.notifyItemRangeInserted(oldSize, pageData.size)
-            }
-
-            // 注释掉异构布局处理，实现纯双列瀑布流
-            // handleHeterogeneousLayout()
-
-            Log.d(TAG, "加载第 $currentPage 页，本页 ${pageData.size} 条，总共 ${feedList.size} 条")
-        } else {
-            hasMoreData = false
-            Toast.makeText(this, "已经到底了", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
-
-    /**
-     * 处理卡片点击事件
-     */
     private fun handleItemClick(feedItem: FeedItem) {
-        Log.d(TAG, "点击了卡片: ${feedItem.title}, type=${feedItem.type}")
-
-        // 跳转到详情页
+        Log.d(TAG, "点击了卡片: ${feedItem.title}")
         val intent = Intent(this, DetailActivity::class.java)
         intent.putExtra(DetailActivity.EXTRA_FEED_ITEM, feedItem)
         startActivity(intent)
-
-        // 可以根据type做不同的处理
-        when (feedItem.type) {
-            0 -> {
-                // 商品卡片
-                Log.d(TAG, "打开商品详情")
-            }
-            1 -> {
-                // 活动卡片
-                Log.d(TAG, "打开活动详情")
-            }
-            2 -> {
-                // 视频卡片
-                Log.d(TAG, "打开视频详情")
-            }
-        }
-    }
-
-    /**
-     * 显示/隐藏加载指示器
-     */
-    private fun showLoading(show: Boolean) {
-        progressBar.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // 移除所有待处理的消息
         handler.removeCallbacksAndMessages(null)
     }
 }
