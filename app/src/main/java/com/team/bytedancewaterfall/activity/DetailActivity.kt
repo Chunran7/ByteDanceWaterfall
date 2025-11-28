@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.ImageButton
@@ -18,6 +19,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.team.bytedancewaterfall.R
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem
+import com.team.bytedancewaterfall.utils.PurchaseUtils
 
 /**
  * 详情页Activity
@@ -35,6 +37,9 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var tvDetailDescription: TextView
     private lateinit var chipGroupTags: ChipGroup
     private lateinit var tvDetailId: TextView
+    private lateinit var btnAddToCart: Button
+    private lateinit var btnBuyNow: Button
+    private var currentFeedItem: FeedItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +72,24 @@ class DetailActivity : AppCompatActivity() {
         tvDetailDescription = findViewById(R.id.tv_detail_description)
         chipGroupTags = findViewById(R.id.chip_group_tags)
         tvDetailId = findViewById(R.id.tv_detail_id)
+        
+        // 初始化购物车和购买按钮
+        btnAddToCart = findViewById(R.id.btn_add_to_cart)
+        btnBuyNow = findViewById(R.id.btn_buy_now)
+        
+        // 设置按钮点击事件
+        btnAddToCart.setOnClickListener {
+            currentFeedItem?.let { item ->
+                PurchaseUtils.addToCart(this, item)
+            }
+        }
+        
+        btnBuyNow.setOnClickListener {
+            currentFeedItem?.let { item ->
+                PurchaseUtils.buyNow(this, item)
+            }
+        }
+        
         // 添加滚动监听器
         mediaScrollView.setOnScrollChangeListener { _, scrollX, _, _, _ ->
             handleMediaScroll(scrollX)
@@ -76,6 +99,8 @@ class DetailActivity : AppCompatActivity() {
      * 将FeedItem数据绑定到视图
      */
     private fun bindData(feedItem: FeedItem) {
+        // 保存当前FeedItem引用
+        currentFeedItem = feedItem
         // 清空媒体容器
         mediaContainer.removeAllViews()
         val screenWidth = resources.displayMetrics.widthPixels
@@ -151,6 +176,9 @@ class DetailActivity : AppCompatActivity() {
         } else {
             chipGroupTags.visibility = View.GONE
         }
+        
+        // 设置ID信息
+        tvDetailId.text = "商品ID: ${feedItem.id}"
     }
 
     override fun onPause() {
