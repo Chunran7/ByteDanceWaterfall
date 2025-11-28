@@ -29,6 +29,7 @@ import lombok.Data;
 
 @Data
 public class FeedItemData {
+    private static final String TAG = "FeedItemData";
     public static List<FeedItem> feedItemList;
     static{
         feedItemList = new ArrayList<>();
