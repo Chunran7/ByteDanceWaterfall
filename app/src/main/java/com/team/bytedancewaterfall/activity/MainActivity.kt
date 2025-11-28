@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 
     // 分页相关
     private var currentPage = 1
-    private val pageSize = 4  // 每页4条数据
+    private val pageSize = 12  // 每页4条数据
     private var allData = listOf<FeedItem>()  // 存储所有数据
     private var hasMoreData = true  // 是否还有更多数据
 
@@ -116,6 +116,8 @@ class MainActivity : AppCompatActivity() {
 
         // 创建StaggeredGridLayoutManager（瀑布流布局管理器）
         layoutManager = StaggeredGridLayoutManager(SPAN_COUNT, StaggeredGridLayoutManager.VERTICAL)
+        // 解决瀑布流滚动时的乱序和留白问题
+        layoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
 
         // 设置LayoutManager
         recyclerView.layoutManager = layoutManager
@@ -140,6 +142,14 @@ class MainActivity : AppCompatActivity() {
                 if (!recyclerView.canScrollVertically(1) && dy > 0) {
                     // 滚动到底部，加载更多数据
                     loadMoreData()
+                }
+            }
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                // 停止滚动时，重新计算布局，防止卡片位置发生变化
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    layoutManager.invalidateSpanAssignments()
                 }
             }
         })
@@ -243,9 +253,6 @@ class MainActivity : AppCompatActivity() {
 
         isLoadingMore = true
         Log.d(TAG, "加载更多数据，当前页: $currentPage")
-
-        // 显示正在加载提示
-        Toast.makeText(this, "正在加载", Toast.LENGTH_SHORT).show()
 
         // 模拟异步加载更多数据
         handler.postDelayed({
