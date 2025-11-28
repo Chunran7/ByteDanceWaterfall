@@ -29,6 +29,7 @@ import lombok.Data;
 
 @Data
 public class FeedItemData {
+    private static final String TAG = "FeedItemData";
     public static List<FeedItem> feedItemList;
     static{
         feedItemList = new ArrayList<>();
@@ -89,58 +90,60 @@ public class FeedItemData {
 
     // 提供一个方法，在应用启动时由拥有 Context 的组件调用
     public static void initDatabase(Context context) {
-        FeedItemDatabaseHelper dbHelper = new FeedItemDatabaseHelper(context);
-        SQLiteDatabase db = null;
-        try {
-            db = dbHelper.getWritableDatabase(); // 这会触发 onCreate 如果数据库不存在
-            // 检查是否已经有数据，避免重复插入
-            int count = dbHelper.getCount();
-//            addTest(context);
-            if (count > 0) {
-                Log.d(TAG, "Database already exists. Skipping initialization.");
-                return;
-            }
-            // 这里简化处理，每次启动都清空并重新插入
-            // 实际项目中应根据需求判断是否需要清空
-//            db.delete(FeedItemDatabaseHelper.TABLE_NOTES, null, null);
-            db.beginTransaction();
+        new Thread(()-> {
+            FeedItemDatabaseHelper dbHelper = new FeedItemDatabaseHelper(context);
+            SQLiteDatabase db = null;
             try {
-                for (FeedItem item : feedItemList) {
-                    ContentValues values = new ContentValues();
-                    values.put("id", item.getId());
-                    values.put("type", item.getType());
-                    if (item.getImageUrl() == null) {
-                        values.put("imageUrl", item.getImageUrl());
-                    }else {
-                        values.put("imageUrl", copyFileToPrivateDirByType(context, item.getImageUrl(), "image", 0));
-                    }
-                    values.put("title", item.getTitle());
-                    values.put("description", item.getDescription());
-                    values.put("price", item.getPrice());
-                    // 序列化 tags 列表
-                    values.put("tags", JSON.toJSONString(item.getTags()));
-                    if (item.getVideoUrl() == null) {
-                        values.put("videoUrl", item.getVideoUrl());
-                    }else {
-                        values.put("videoUrl", copyFileToPrivateDirByType(context, item.getVideoUrl(), "video", 1));
-                    }
-                    long result = db.insert(FeedItemDatabaseHelper.TABLE_NOTES, null, values);
-                    if (result == -1) {
-                        Log.e(TAG, "Failed to insert item with id: " + item.getId());
-                    }
+                db = dbHelper.getWritableDatabase(); // 这会触发 onCreate 如果数据库不存在
+                // 检查是否已经有数据，避免重复插入
+                int count = dbHelper.getCount();
+//            addTest(context);
+                if (count > 0) {
+                    Log.d(TAG, "Database already exists. Skipping initialization.");
+                    return;
                 }
-                db.setTransactionSuccessful();
-                Log.d(TAG, "Database initialized with mock data.");
+                // 这里简化处理，每次启动都清空并重新插入
+                // 实际项目中应根据需求判断是否需要清空
+//            db.delete(FeedItemDatabaseHelper.TABLE_NOTES, null, null);
+                db.beginTransaction();
+                try {
+                    for (FeedItem item : feedItemList) {
+                        ContentValues values = new ContentValues();
+                        values.put("id", item.getId());
+                        values.put("type", item.getType());
+                        if (item.getImageUrl() == null) {
+                            values.put("imageUrl", item.getImageUrl());
+                        } else {
+                            values.put("imageUrl", copyFileToPrivateDirByType(context, item.getImageUrl(), "image", 0));
+                        }
+                        values.put("title", item.getTitle());
+                        values.put("description", item.getDescription());
+                        values.put("price", item.getPrice());
+                        // 序列化 tags 列表
+                        values.put("tags", JSON.toJSONString(item.getTags()));
+                        if (item.getVideoUrl() == null) {
+                            values.put("videoUrl", item.getVideoUrl());
+                        } else {
+                            values.put("videoUrl", copyFileToPrivateDirByType(context, item.getVideoUrl(), "video", 1));
+                        }
+                        long result = db.insert(FeedItemDatabaseHelper.TABLE_NOTES, null, values);
+                        if (result == -1) {
+                            Log.e(TAG, "Failed to insert item with id: " + item.getId());
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                    Log.d(TAG, "Database initialized with mock data.");
+                } finally {
+                    db.endTransaction();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error initializing database", e);
             } finally {
-                db.endTransaction();
+                if (db != null && db.isOpen()) {
+                    db.close();
+                }
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Error initializing database", e);
-        } finally {
-            if (db != null && db.isOpen()) {
-                db.close();
-            }
-        }
+        }).start();
     }
     /**
      * 从drawable资源复制图片到应用私有目录
