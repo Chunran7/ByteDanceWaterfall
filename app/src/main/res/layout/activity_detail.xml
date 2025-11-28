@@ -11,29 +11,41 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- 顶部图片 -->
-        <ImageView
-            android:id="@+id/iv_detail_image"
+        <!-- 替换原有的 ImageView 为水平滚动容器 -->
+        <!-- 在 activity_detail.xml 中修改 HorizontalScrollView -->
+        <HorizontalScrollView
+            android:id="@+id/media_scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:scaleType="centerCrop"
-            android:contentDescription="@string/app_name"
+            android:layout_height="0dp"
+            android:scrollbars="horizontal"
+            android:fillViewport="true"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:src="@tools:sample/backgrounds/scenic" />
+            app:layout_constraintHeight_percent="0.4">
 
-        <!-- 返回按钮 -->
+            <LinearLayout
+                android:id="@+id/media_container"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+
+<!--        &lt;!&ndash; 返回按钮 &ndash;&gt;
         <ImageButton
             android:id="@+id/btn_back"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_margin="16dp"
-            android:background="@android:drawable/dialog_holo_light_frame"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/transparent"
             android:contentDescription="返回"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:src="@android:drawable/ic_media_previous"
+            android:padding="8dp"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent" />-->
 
         <!-- 内容卡片 -->
         <com.google.android.material.card.MaterialCardView
@@ -43,7 +55,7 @@
             android:layout_margin="16dp"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
-            app:layout_constraintTop_toBottomOf="@id/iv_detail_image"
+            app:layout_constraintTop_toBottomOf="@id/media_scroll_view"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 

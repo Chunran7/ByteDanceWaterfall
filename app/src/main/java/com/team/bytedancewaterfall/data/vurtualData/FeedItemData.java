@@ -33,6 +33,7 @@ public class FeedItemData {
     public static List<FeedItem> feedItemList;
     static{
         feedItemList = new ArrayList<>();
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 2, "drawable://"+R.drawable.test2_1, "大疆Action 6", "DJI大疆 Action6 新品运动相机骑行潜水旅游挂脖防抖vlog户外", "2999.00", Arrays.asList("大疆DJ", "相机", "运动"),"drawable://"+R.raw.video_dj_3));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test1_0, "陶瓷水杯", "精品套餐水杯，泡茶接待客人使用", "19.90", Arrays.asList("陶瓷", "杯子"), null));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test1_1, "保温杯", "保温杯定制印logo开业宣传广告杯子公司员工活动纪念礼品水杯刻字", "19.80", Arrays.asList("保温", "水杯", "不锈钢"), null));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test1_2, "双层玻璃杯", "定制广告杯子双层玻璃杯赠品水杯印字保温杯定做礼品杯印logo茶杯", "9.90", Arrays.asList("定制logo", "水杯", "双层玻璃"), null));
@@ -53,7 +54,6 @@ public class FeedItemData {
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_10, "可爱猫猫书包挂件", "金属钥匙扣挂件定制logo企业周年校庆纪念礼品定做文创景区钥匙链订制", "9.90", Arrays.asList("挂件", "可定制", "文创"), null));
 
         // 视频数据初始化
-        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 2, "drawable://"+R.drawable.test2_1, "大疆Action 6", "DJI大疆 Action6 新品运动相机骑行潜水旅游挂脖防抖vlog户外", "2999.00", Arrays.asList("大疆DJ", "相机", "运动"),"drawable://"+R.raw.video_dj_3));
 
     }
    /* public static List<FeedItem> getFeedItemList() {
