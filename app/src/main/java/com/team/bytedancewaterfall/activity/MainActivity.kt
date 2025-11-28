@@ -198,10 +198,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleItemClick(feedItem: FeedItem) {
-        Log.d(TAG, "点击了卡片: ${feedItem.title}")
-        val intent = Intent(this, DetailActivity::class.java)
-        intent.putExtra(DetailActivity.EXTRA_FEED_ITEM, feedItem)
-        startActivity(intent)
+        try {
+            Log.d(TAG, "点击了卡片: ${feedItem.title}")
+            // 进入到单栏布局
+            val intent = Intent(this, FeedScrollActivity::class.java)
+            
+            // 安全地获取当前点击项在列表中的索引
+            val currentIndex = feedList.indexOf(feedItem)
+            if (currentIndex >= 0) {
+                // 创建一个新的ArrayList来存储从当前索引开始的数据
+                val remainingItems = ArrayList<FeedItem>()
+                
+                // 手动添加从当前索引开始的所有元素，避免subList可能带来的问题
+                for (i in currentIndex until feedList.size) {
+                    remainingItems.add(feedList[i])
+                }
+                
+                // 传递从当前点击项开始的子列表数据
+                intent.putExtra(FeedScrollActivity.EXTRA_FEED_ITEMS, remainingItems)
+                // 传递起始索引（在子列表中始终为0）
+                intent.putExtra(FeedScrollActivity.EXTRA_START_INDEX, 0)
+                
+                // 启动Activity
+                startActivity(intent)
+            } else {
+                Log.e(TAG, "未找到FeedItem在列表中的位置")
+                Toast.makeText(this, "加载失败，请重试", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            // 捕获所有可能的异常，避免应用闪退
+            Log.e(TAG, "点击卡片时发生错误: ${e.message}", e)
+            Toast.makeText(this, "加载失败，请重试", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroy() {
