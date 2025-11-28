@@ -17,8 +17,7 @@
             android:id="@+id/iv_cover"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
+            android:scaleType="fitXY"
             tools:src="@tools:sample/backgrounds/scenic" />
 
         <TextView
@@ -28,7 +27,7 @@
             android:padding="8dp"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="14sp"
-            tools:text="This is a sample product description  that might be quite long." />
+            tools:text="This is a sample product description that might be quite long." />
 
         <TextView
             android:id="@+id/tv_price"
