@@ -1,6 +1,10 @@
 package com.team.bytedancewaterfall.data.pojo.entity;
 
+import android.content.ContentValues;
+
 public class User {
+    // 用户id
+    private String id;
     // 登录用户名
     private String username;
     // 登录密码
@@ -17,6 +21,7 @@ public class User {
     private String phone;
     public User(){}
     public User(String username, String password, String token, String avatar, String nickname, String email, String phone) {
+        this.id = id;
         this.username = username;
         this.password = password;
         this.token = token;
@@ -25,6 +30,15 @@ public class User {
         this.email = email;
         this.phone = phone;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -79,5 +93,18 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public ContentValues toContentValues() {
+        ContentValues values = new ContentValues();
+        values.put("id", id);
+        values.put("username", username);
+        values.put("password", password);
+        values.put("token", token);
+        values.put("avatar", avatar);
+        values.put("nickname", nickname);
+        values.put("email", email);
+        values.put("phone", phone);
+        return values;
     }
 }

@@ -50,6 +50,11 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    
+    // JWT库依赖
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
     // https://mvnrepository.com/artifact/cn.javaex/htool-core
     implementation("cn.javaex:htool-core:1.3.4")
     // https://mvnrepository.com/artifact/org.projectlombok/lombok

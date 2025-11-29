@@ -5,6 +5,7 @@ import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -15,14 +16,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "feed_item.db";
-    private static final int DATABASE_VERSION = 1;
-    public FeedItemDatabaseHelper(Context context) {
+public class FeedItemDatabaseHelper{
+/*    private static final String DATABASE_NAME = "feed_item.db";
+    private static final int DATABASE_VERSION = 1;*/
+/*    public FeedItemDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }*/
+    private SQLiteDatabase db;
+
+    public FeedItemDatabaseHelper(Context context) {
+        this.db = AppDatabaseHelper.getInstance(context).getWritableDatabase();
     }
     public static final String TABLE_NOTES = "feed_item";
-    private static final String TABLE_CREATE =
+    public static final String TABLE_CREATE =
             "CREATE TABLE IF NOT EXISTS " + TABLE_NOTES + "("
                     + "id TEXT PRIMARY KEY, " +
                     "type INTEGER NOT NULL, " +
@@ -34,7 +40,7 @@ public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
                     "videoUrl TEXT" +
                     ")";
 
-    @Override
+/*    @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         // 创建表、
         sqLiteDatabase.execSQL(TABLE_CREATE);
@@ -46,15 +52,13 @@ public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTES);
         // 创建表
         onCreate(sqLiteDatabase);
-    }
+    }*/
     /**
      * 查询所有FeedItem数据并封装为List
      * @return List<FeedItem> 数据列表
      */
     public List<FeedItem> getAllFeedItems() {
         List<FeedItem> feedItems = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-
         Cursor cursor = null;
         try {
             cursor = db.query(TABLE_NOTES, null, null, null, null, null, null);
@@ -94,9 +98,10 @@ public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
             if (cursor != null) {
                 cursor.close();
             }
-            if (db != null && db.isOpen()) {
-                db.close();
-            }
+            // 移除数据库连接关闭，因为db是从AppDatabaseHelper单例获取的共享连接
+            // if (db != null && db.isOpen()) {
+            //     db.close();
+            // }
         }
         return feedItems;
     }
@@ -104,7 +109,6 @@ public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
      * 查询数据库表数据量
      */
     public int getCount() {
-        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_NOTES, null);
         cursor.moveToFirst();
         int count = cursor.getInt(0);
@@ -123,18 +127,22 @@ public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
             // id为空，自定义id
             feedItem.setId(UUID.randomUUID().toString());
         }
-        SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
         long insNum = 0l;
         try {
             insNum = db.insert(TABLE_NOTES, null, feedItem.toContentValues());
-        }
-        catch (Exception e) {
+            if (insNum > 0) {
+                // 标记事务成功，确保数据写入数据库
+                db.setTransactionSuccessful();
+                return true;
+            }
+            return false;
+        }catch (SQLiteException e) {
             Log.e(TAG, "Error inserting feed item", e);
         }finally {
             db.endTransaction();
         }
-        return insNum > 0;
+        return false;
     }
 
     /**
@@ -143,7 +151,6 @@ public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
      * @return
      */
     public FeedItem getFeedItemById(String id) {
-        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_NOTES, null, "id=?", new String[]{id}, null, null, null);
         FeedItem item = null;
         if (cursor != null && cursor.moveToFirst()) {
@@ -176,21 +183,26 @@ public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
      * @return
      */
     public boolean deleteById(List<String> ids) {
-        SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
         int delNum = 0;
         try {
             for (String id : ids) {
                 delNum += db.delete(TABLE_NOTES, "id=?", new String[]{id});
             }
+            if (delNum > 0) {
+                // 标记事务成功
+                db.setTransactionSuccessful();
+                return true;
+            }
+            return false;
         }
         catch (Exception e) {
             Log.e(TAG, "Error deleting feed item", e);
+            return false;
         }
         finally {
             db.endTransaction();
         }
-        return delNum > 0;
     }
 
     /**
@@ -199,17 +211,25 @@ public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
      * @return
      */
     public boolean updateFeedItem(FeedItem feedItem) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        if (feedItem == null || feedItem.getId() == null) {
+            return false;
+        }
         db.beginTransaction();
         int updateNum = 0;
         try {
             updateNum = db.update(TABLE_NOTES, feedItem.toContentValues(), "id=?", new String[]{feedItem.getId()});
+            if (updateNum > 0) {
+                // 标记事务成功
+                db.setTransactionSuccessful();
+                return true;
+            }
+            return false;
         }catch (Exception e) {
             Log.e(TAG, "Error updating feed item", e);
+            return false;
         }finally {
             db.endTransaction();
         }
-        return updateNum > 0;
     }
 
     /**
@@ -219,7 +239,6 @@ public class FeedItemDatabaseHelper extends SQLiteOpenHelper {
      * @return
      */
     public List<FeedItem> pageQueryFeedList(Integer page, Integer size) {
-        SQLiteDatabase db = this.getReadableDatabase();
         String sql = "SELECT * FROM " + TABLE_NOTES + " LIMIT ?, ?";
         String limit = String.format("%d, %d", (page - 1) * size, size);
         Cursor cursor = db.rawQuery(sql, new String[]{limit});
