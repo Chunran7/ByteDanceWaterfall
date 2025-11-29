@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class AppDatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "feed_item.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
     private static AppDatabaseHelper INSTANCE;
     private final Context mContext;
     private AppDatabaseHelper(Context context) {
@@ -29,6 +29,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         // 创建表
         db.execSQL(FeedItemDatabaseHelper.TABLE_CREATE);
         db.execSQL(UserDatabaseHelper.TABLE_CREATE);
+        db.execSQL(CartDatabaseHelper.TABLE_CREATE);
     }
 
     @Override

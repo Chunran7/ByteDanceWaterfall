@@ -1,5 +1,7 @@
 package com.team.bytedancewaterfall.activity;
 
+import static com.team.bytedancewaterfall.utils.PurchaseUtils.showToast;
+
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -11,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.team.bytedancewaterfall.R;
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 import com.team.bytedancewaterfall.adapter.FeedScrollAdapter;
+import com.team.bytedancewaterfall.data.service.impl.CartServiceImpl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,6 +21,8 @@ import java.util.List;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Toast;
+
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener;
 
 /**
@@ -181,14 +186,20 @@ public class FeedScrollActivity extends AppCompatActivity {
 
             @Override
             public void onAddToCartClick(int position, FeedItem feedItem) {
+                // TODO 用户暂时写死
                 // 预留加入购物车方法调用
-                handleAddToCart(feedItem);
+                boolean b = CartServiceImpl.getInstance().addCartItem(FeedScrollActivity.this, feedItem.getId(), "0001");
+                if (b) {
+                    // 显示Toast提示
+                    showToast(FeedScrollActivity.this, "加入购物车成功");
+                } else {
+                    showToast(FeedScrollActivity.this, "加入购物车成功");
+                }
             }
 
             @Override
             public void onBuyNowClick(int position, FeedItem feedItem) {
-                // 预留立即购买方法调用
-                handleBuyNow(feedItem);
+                // TODO 预留立即购买方法调用
             }
         });
 
@@ -208,26 +219,6 @@ public class FeedScrollActivity extends AppCompatActivity {
                 }
             });
         }
-    }
-
-    /**
-     * 处理加入购物车操作
-     *
-     * @param feedItem 当前被操作的商品项
-     */
-    private void handleAddToCart(FeedItem feedItem) {
-        // 预留调用插入数据的方法
-        // TODO: 实现加入购物车逻辑
-    }
-
-    /**
-     * 处理立即购买操作
-     *
-     * @param feedItem 当前被操作的商品项
-     */
-    private void handleBuyNow(FeedItem feedItem) {
-        // 预留调用插入数据的方法
-        // TODO: 实现立即购买逻辑
     }
     
     /**

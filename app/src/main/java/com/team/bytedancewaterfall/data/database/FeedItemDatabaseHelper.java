@@ -28,16 +28,24 @@ public class FeedItemDatabaseHelper{
         this.db = AppDatabaseHelper.getInstance(context).getWritableDatabase();
     }
     public static final String TABLE_NOTES = "feed_item";
+    public static final String COLUMN_ID = "id";
+    public static final String COLUMN_TYPE = "type";
+    public static final String COLUMN_IMAGE_URL = "imageUrl";
+    public static final String COLUMN_TITLE = "title";
+    public static final String COLUMN_DESCRIPTION = "description";
+    public static final String COLUMN_PRICE = "price";
+    public static final String COLUMN_TAGS = "tags";
+    public static final String COLUMN_VIDEO_URL = "videoUrl";
     public static final String TABLE_CREATE =
-            "CREATE TABLE IF NOT EXISTS " + TABLE_NOTES + "("
-                    + "id TEXT PRIMARY KEY, " +
-                    "type INTEGER NOT NULL, " +
-                    "imageUrl TEXT, " +
-                    "title TEXT, " +
-                    "description TEXT, " +
-                    "price TEXT, " +
-                    "tags TEXT, " +
-                    "videoUrl TEXT" +
+            "CREATE TABLE IF NOT EXISTS " + TABLE_NOTES + "(" +
+                    COLUMN_ID + "TEXT PRIMARY KEY, " +
+                    COLUMN_TYPE + "INTEGER NOT NULL, " +
+                    COLUMN_IMAGE_URL + "TEXT, " +
+                    COLUMN_TITLE + "TEXT, " +
+                    COLUMN_DESCRIPTION + "TEXT, " +
+                    COLUMN_PRICE + "TEXT, " +
+                    COLUMN_TAGS + "TEXT, " +
+                    COLUMN_VIDEO_URL + "TEXT" +
                     ")";
 
 /*    @Override

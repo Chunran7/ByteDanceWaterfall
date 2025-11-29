@@ -1,13 +1,11 @@
 package com.team.bytedancewaterfall.activity
 
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.MediaController
@@ -19,6 +17,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.team.bytedancewaterfall.R
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem
+import com.team.bytedancewaterfall.data.service.impl.CartServiceImpl
 import com.team.bytedancewaterfall.utils.PurchaseUtils
 
 /**
@@ -77,17 +76,25 @@ class DetailActivity : AppCompatActivity() {
         btnAddToCart = findViewById(R.id.btn_add_to_cart)
         btnBuyNow = findViewById(R.id.btn_buy_now)
         
-        // 设置按钮点击事件
+        // 设置按钮点击事件, 添加到购物车
         btnAddToCart.setOnClickListener {
             currentFeedItem?.let { item ->
-                PurchaseUtils.addToCart(this, item)
+                // TODO 用户暂时写死
+                var res = CartServiceImpl.getInstance().addCartItem(this, item.id, "001L")
+                if (res) {
+                    // 显示Toast提示
+                    PurchaseUtils.showToast(this, "加入购物车成功")
+                } else {
+                    PurchaseUtils.showToast(this, "加入购物车成功")
+                }
             }
         }
-        
+        // 购买按钮
         btnBuyNow.setOnClickListener {
-            currentFeedItem?.let { item ->
-                PurchaseUtils.buyNow(this, item)
-            }
+            // TODO 购买方法
+//            currentFeedItem?.let { item ->
+//                PurchaseUtils.buyNow(this, item)
+//            }
         }
         
         // 添加滚动监听器
