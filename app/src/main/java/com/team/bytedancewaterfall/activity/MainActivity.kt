@@ -210,14 +210,14 @@ class MainActivity : AppCompatActivity() {
                 val remainingItems = ArrayList<FeedItem>()
                 
                 // 手动添加从当前索引开始的所有元素，避免subList可能带来的问题
-                for (i in currentIndex until feedList.size) {
+                for (i in 0 until feedList.size) {
                     remainingItems.add(feedList[i])
                 }
                 
                 // 传递从当前点击项开始的子列表数据
                 intent.putExtra(FeedScrollActivity.EXTRA_FEED_ITEMS, remainingItems)
-                // 传递起始索引（在子列表中始终为0）
-                intent.putExtra(FeedScrollActivity.EXTRA_START_INDEX, 0)
+                // 传递起始索引
+                intent.putExtra(FeedScrollActivity.EXTRA_START_INDEX, currentIndex)
                 
                 // 启动Activity
                 startActivity(intent)
