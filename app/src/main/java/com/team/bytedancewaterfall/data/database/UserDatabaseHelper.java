@@ -82,23 +82,30 @@ public class UserDatabaseHelper {
     public User getUserByUserName(String username) {
         String sql = "SELECT * FROM " + TABLE_NOTES + " WHERE " + COLUMN_USERNAME + " = ?";
         User user = null;
+        Cursor cursor = null;
         try {
-            Cursor cursor = db.rawQuery(sql, new String[]{username});
-            if (cursor.moveToFirst()) {
+             cursor = db.rawQuery(sql, new String[]{username});
+            if (cursor != null && cursor.moveToFirst()) {
                 user = new User();
-                user.setId(cursor.getString(cursor.getColumnIndex(COLUMN_ID)));
-                user.setUsername(cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME)));
-                user.setPassword(cursor.getString(cursor.getColumnIndex(COLUMN_PASSWORD)));
-                user.setToken(cursor.getString(cursor.getColumnIndex(COLUMN_TOKEN)));
-                user.setAvatar(cursor.getString(cursor.getColumnIndex(COLUMN_AVATAR)));
-                user.setNickname(cursor.getString(cursor.getColumnIndex(COLUMN_NICKNAME)));
-                user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_EMAIL)));
-                user.setPhone(cursor.getString(cursor.getColumnIndex(COLUMN_PHONE)));
-                cursor.close();
+                user.setId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)));
+                user.setUsername(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME)));
+                user.setPassword(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD)));
+                user.setToken(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TOKEN)));
+                user.setAvatar(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_AVATAR)));
+                user.setNickname(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NICKNAME)));
+                user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)));
+                user.setPhone(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE)));
                 return user;
             }
         }catch (Exception e) {
             Log.e(TAG, "Error getting user by username", e);
+            if (cursor != null) {
+                cursor.close();
+            }
+        }finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
         return user;
     }

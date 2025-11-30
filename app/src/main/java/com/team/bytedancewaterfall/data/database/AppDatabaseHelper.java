@@ -6,19 +6,20 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class AppDatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "feed_item.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
     private static AppDatabaseHelper INSTANCE;
     private final Context mContext;
     private AppDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.mContext = context.getApplicationContext();    // 强制转为ApplicationContext
     }
-    public static synchronized AppDatabaseHelper getInstance(Context context) {
-        if (INSTANCE == null) {
-            synchronized (AppDatabaseHelper.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new AppDatabaseHelper(context.getApplicationContext());
-                }
+    public static AppDatabaseHelper getInstance(Context context) {
+        if (INSTANCE != null) {
+            return INSTANCE;
+        }
+        synchronized (AppDatabaseHelper.class) {
+            if (INSTANCE == null) {
+                INSTANCE = new AppDatabaseHelper(context.getApplicationContext());
             }
         }
         return INSTANCE;
@@ -37,6 +38,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         // 删除表
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + FeedItemDatabaseHelper.TABLE_NOTES);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UserDatabaseHelper.TABLE_NOTES);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + CartDatabaseHelper.TABLE_NOTES);
         // 创建表
         onCreate(sqLiteDatabase);
     }

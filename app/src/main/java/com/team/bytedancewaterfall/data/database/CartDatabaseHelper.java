@@ -89,22 +89,30 @@ public class CartDatabaseHelper {
      * @return
      */
     public Cart getCartBy2Id(String feedItemId, String userId) {
+        Cursor cursor = null;
         try {
-            Cursor cursor = db.query(TABLE_NOTES, null, COLUMN_FEED_ITEM_ID + " = ? AND " + COLUMN_USER_ID + " = ?",
+             cursor = db.query(TABLE_NOTES, null, COLUMN_FEED_ITEM_ID + " = ? AND " + COLUMN_USER_ID + " = ?",
                     new String[]{feedItemId, userId}, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 // 查到了数据
                 Cart cart = new Cart();
-                cart.setId(cursor.getString(cursor.getColumnIndex(COLUMN_ID)));
-                cart.setUserId(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
-                cart.setFeedItemId(cursor.getString(cursor.getColumnIndex(COLUMN_FEED_ITEM_ID)));
-                cart.setCount(cursor.getInt(cursor.getColumnIndex(COLUMN_COUNT)));
-                cart.setUpdateTime(cursor.getString(cursor.getColumnIndex(COLUMN_UPDATE_TIME)));
+                cart.setId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)));
+                cart.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_ID)));
+                cart.setFeedItemId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FEED_ITEM_ID)));
+                cart.setCount(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COUNT)));
+                cart.setUpdateTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_UPDATE_TIME)));
                 cursor.close();
                 return cart;
             }
         }catch (SQLiteException e) {
             Log.e(TAG, "Error querying cart item", e);
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
         }
         return null;
     }
@@ -116,23 +124,37 @@ public class CartDatabaseHelper {
      */
     public List<Cart> getListByUserId(String userId) {
         List<Cart> cartList = new ArrayList<>();
+        Cursor cursor = null;
         try {
-            Cursor cursor = db.query(TABLE_NOTES, null, COLUMN_USER_ID + " = ?",
+             cursor = db.query(TABLE_NOTES, null, COLUMN_USER_ID + " = ?",
                     new String[]{userId}, null, null, COLUMN_UPDATE_TIME + " DESC");
             if (cursor != null && cursor.moveToFirst()) {
+                // 获取列索引
+                int idIndex = cursor.getColumnIndex(COLUMN_ID);
+                int userIdIndex = cursor.getColumnIndex(COLUMN_USER_ID);
+                int feedItemIdIndex = cursor.getColumnIndex(COLUMN_FEED_ITEM_ID);
+                int countIndex = cursor.getColumnIndex(COLUMN_COUNT);
+                int updateTimeIndex = cursor.getColumnIndex(COLUMN_UPDATE_TIME);
                 do {
                     Cart cart = new Cart();
-                    cart.setId(cursor.getString(cursor.getColumnIndex(COLUMN_ID)));
-                    cart.setUserId(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
-                    cart.setFeedItemId(cursor.getString(cursor.getColumnIndex(COLUMN_FEED_ITEM_ID)));
-                    cart.setCount(cursor.getInt(cursor.getColumnIndex(COLUMN_COUNT)));
-                    cart.setUpdateTime(cursor.getString(cursor.getColumnIndex(COLUMN_UPDATE_TIME)));
+                    cart.setId(cursor.getString(idIndex));
+                    cart.setUserId(cursor.getString(userIdIndex));
+                    cart.setFeedItemId(cursor.getString(feedItemIdIndex));
+                    cart.setCount(cursor.getInt(countIndex));
+                    cart.setUpdateTime(cursor.getString(updateTimeIndex));
                     cartList.add(cart);
                 } while (cursor.moveToNext());
+                cursor.close();
             }
-            cursor.close();
         }catch (SQLiteException e) {
             Log.e(TAG, "Error querying cart item", e);
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
         }
         return cartList;
     }
@@ -151,15 +173,25 @@ public class CartDatabaseHelper {
                     " where cart." + CartDatabaseHelper.COLUMN_USER_ID + " = ?";
             cursor = db.rawQuery(sql, new String[]{userId});
             if (cursor != null && cursor.moveToFirst()) {
+                // 获取列索引
+                int countIndex = cursor.getColumnIndexOrThrow(CartDatabaseHelper.COLUMN_COUNT);
+                int typeIndex = cursor.getColumnIndexOrThrow(FeedItemDatabaseHelper.COLUMN_TYPE);
+                int imageUrlIndex = cursor.getColumnIndexOrThrow(FeedItemDatabaseHelper.COLUMN_IMAGE_URL);
+                int titleIndex = cursor.getColumnIndexOrThrow(FeedItemDatabaseHelper.COLUMN_TITLE);
+                int descriptionIndex = cursor.getColumnIndexOrThrow(FeedItemDatabaseHelper.COLUMN_DESCRIPTION);
+                int priceIndex = cursor.getColumnIndexOrThrow(FeedItemDatabaseHelper.COLUMN_PRICE);
+                int tagsIndex = cursor.getColumnIndexOrThrow(FeedItemDatabaseHelper.COLUMN_TAGS);
+                int videoUrlIndex = cursor.getColumnIndexOrThrow(FeedItemDatabaseHelper.COLUMN_VIDEO_URL);
+
                 do {
                     CartAndFeed cartAndFeed = new CartAndFeed();
-                    cartAndFeed.setCount(cursor.getInt(cursor.getColumnIndex(CartDatabaseHelper.COLUMN_COUNT)));
-                    cartAndFeed.setType(cursor.getInt(cursor.getColumnIndex(FeedItemDatabaseHelper.COLUMN_TYPE)));
-                    cartAndFeed.setImageUrl(cursor.getString(cursor.getColumnIndex(FeedItemDatabaseHelper.COLUMN_IMAGE_URL)));
-                    cartAndFeed.setTitle(cursor.getString(cursor.getColumnIndex(FeedItemDatabaseHelper.COLUMN_TITLE)));
-                    cartAndFeed.setDescription(cursor.getString(cursor.getColumnIndex(FeedItemDatabaseHelper.COLUMN_DESCRIPTION)));
-                    cartAndFeed.setPrice(cursor.getString(cursor.getColumnIndex(FeedItemDatabaseHelper.COLUMN_PRICE)));
-                    String tagsString = cursor.getString(cursor.getColumnIndexOrThrow("tags"));
+                    cartAndFeed.setCount(cursor.getInt(countIndex));
+                    cartAndFeed.setType(cursor.getInt(typeIndex));
+                    cartAndFeed.setImageUrl(cursor.getString(imageUrlIndex));
+                    cartAndFeed.setTitle(cursor.getString(titleIndex));
+                    cartAndFeed.setDescription(cursor.getString(descriptionIndex));
+                    cartAndFeed.setPrice(cursor.getString(priceIndex));
+                    String tagsString = cursor.getString(tagsIndex);
                     if (tagsString != null && !tagsString.isEmpty()) {
                         try {
                             List<String> tags = JSON.parseObject(tagsString, new com.alibaba.fastjson2.TypeReference<List<String>>() {});
@@ -168,7 +200,7 @@ public class CartDatabaseHelper {
                             Log.e(TAG, "Failed to parse tags", e);
                         }
                     }
-                    cartAndFeed.setVideoUrl(cursor.getString(cursor.getColumnIndex(FeedItemDatabaseHelper.COLUMN_VIDEO_URL)));
+                    cartAndFeed.setVideoUrl(cursor.getString(videoUrlIndex));
                     // 计算总价格
                     cartAndFeed.setTotalPrice(String.format("%.2f", cartAndFeed.getCount() * Double.parseDouble(cartAndFeed.getPrice())));
                     cartList.add(cartAndFeed);
@@ -178,7 +210,11 @@ public class CartDatabaseHelper {
 
         }catch (SQLiteException e) {
             Log.e(TAG, "Error querying cart item", e);
-            if (cursor != null) {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }finally {
+            if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }
         }
