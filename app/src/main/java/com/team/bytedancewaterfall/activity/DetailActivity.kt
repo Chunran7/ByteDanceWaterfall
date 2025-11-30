@@ -1,5 +1,6 @@
 package com.team.bytedancewaterfall.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,9 @@ import android.widget.LinearLayout
 import android.widget.MediaController
 import android.widget.TextView
 import android.widget.VideoView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
@@ -18,7 +22,9 @@ import com.google.android.material.chip.ChipGroup
 import com.team.bytedancewaterfall.R
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem
 import com.team.bytedancewaterfall.data.service.impl.CartServiceImpl
+import com.team.bytedancewaterfall.data.service.impl.UserServiceImpl
 import com.team.bytedancewaterfall.utils.PurchaseUtils
+import com.team.bytedancewaterfall.utils.ToastUtils
 
 /**
  * 详情页Activity
@@ -39,6 +45,7 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var btnAddToCart: Button
     private lateinit var btnBuyNow: Button
     private var currentFeedItem: FeedItem? = null
+    private var currentOperatingFeedItem: FeedItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +65,29 @@ class DetailActivity : AppCompatActivity() {
             finish()
         }
     }
-
+    private val loginLauncher = registerForActivityResult<Intent?, ActivityResult?>(
+        StartActivityForResult(),
+        ActivityResultCallback { result: ActivityResult? ->
+            if (result!!.getResultCode() == RESULT_OK) {
+                // 登录成功，重新获取当前用户并继续购物车操作
+                var user = UserServiceImpl.getInstance().getCurrentUser(this)
+                if (user != null) {
+                    // 可以在这里执行添加到购物车的逻辑
+                    user = UserServiceImpl.getInstance().getCurrentUser(this)
+                    if (user == null) {
+                        ToastUtils.showShortToast(this, "请先登录")
+                        return@ActivityResultCallback
+                    }
+                    // 预留加入购物车方法调用
+                    CartServiceImpl.getInstance().addCart(
+                        this,
+                        currentOperatingFeedItem,
+                        user.getId()
+                    )
+                }
+            }
+        }
+    )
     /**
      * 初始化所有视图组件
      */
@@ -79,14 +108,18 @@ class DetailActivity : AppCompatActivity() {
         // 设置按钮点击事件, 添加到购物车
         btnAddToCart.setOnClickListener {
             currentFeedItem?.let { item ->
-                // TODO 用户暂时写死
-                var res = CartServiceImpl.getInstance().addCartItem(this, item.id, "001L")
-                if (res) {
-                    // 显示Toast提示
-                    PurchaseUtils.showToast(this, "加入购物车成功")
-                } else {
-                    PurchaseUtils.showToast(this, "加入购物车成功")
+                // 获取当前用户
+                val user = UserServiceImpl.getInstance().getCurrentUser(this)
+                if (user == null) {
+                    // 保存当前要操作的商品信息
+                    currentOperatingFeedItem = item
+                    // 跳转到登录页面等待结果
+                    val intent = Intent(this, LoginActivity::class.java)
+                    loginLauncher.launch(intent)
+                    return@setOnClickListener
                 }
+                // 加入购物车方法调用
+                CartServiceImpl.getInstance().addCart(this, item, user.id)
             }
         }
         // 购买按钮

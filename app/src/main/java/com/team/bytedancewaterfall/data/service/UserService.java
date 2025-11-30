@@ -7,4 +7,6 @@ import com.team.bytedancewaterfall.data.pojo.entity.User;
 
 public interface UserService {
     String userLogin(Context context, LoginDTO loginDTO);
+
+    User getCurrentUser(Context context);
 }

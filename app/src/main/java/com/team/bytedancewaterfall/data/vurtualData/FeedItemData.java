@@ -17,6 +17,7 @@ import com.team.bytedancewaterfall.data.database.UserDatabaseHelper;
 import com.team.bytedancewaterfall.data.fileManage.PrivateMediaStorageManager;
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 import com.team.bytedancewaterfall.data.pojo.entity.User;
+import com.team.bytedancewaterfall.utils.PasswordEncryptUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -102,6 +103,8 @@ public class FeedItemData {
                 }
                 for (User user : userList) {
                     user.setAvatar(copyFileToPrivateDirByType(context, user.getAvatar(), "avatar", 0));
+                    // 加密初始化
+                    user.setPassword(PasswordEncryptUtil.encryptPassword(user.getPassword()));
                     boolean result = dbHelper.insertUser(user);
                 }
             }catch (Exception e) {

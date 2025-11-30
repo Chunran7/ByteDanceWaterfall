@@ -3,6 +3,7 @@ package com.team.bytedancewaterfall.data.service;
 import android.content.Context;
 
 import com.team.bytedancewaterfall.data.pojo.entity.Cart;
+import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 import com.team.bytedancewaterfall.data.pojo.vo.CartAndFeed;
 
 import java.util.List;
@@ -16,4 +17,5 @@ public interface CartService {
     boolean updateCartItem(Context context, Cart cart);
     // 删除购物车信息
     boolean deleteCartItem(Context context, String cartId);
+    void addCart(Context context, FeedItem feedItem, String userId);
 }

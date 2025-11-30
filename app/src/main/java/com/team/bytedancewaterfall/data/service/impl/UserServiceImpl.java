@@ -1,14 +1,21 @@
 package com.team.bytedancewaterfall.data.service.impl;
 
+import static com.team.bytedancewaterfall.activity.LoginActivity.USER_TOKEN;
+
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.team.bytedancewaterfall.activity.FeedScrollActivity;
 import com.team.bytedancewaterfall.data.database.AppDatabaseHelper;
 import com.team.bytedancewaterfall.data.database.UserDatabaseHelper;
 import com.team.bytedancewaterfall.data.pojo.dto.LoginDTO;
+import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 import com.team.bytedancewaterfall.data.pojo.entity.User;
 import com.team.bytedancewaterfall.data.service.UserService;
 import com.team.bytedancewaterfall.utils.JWTUtil;
+import com.team.bytedancewaterfall.utils.PasswordEncryptUtil;
+import com.team.bytedancewaterfall.utils.SPUtils;
+import com.team.bytedancewaterfall.utils.ToastUtils;
 
 public class UserServiceImpl implements UserService {
     private static UserService userService;
@@ -42,9 +49,24 @@ public class UserServiceImpl implements UserService {
         }
         return null;
     }
+    @Override
+    public User getCurrentUser(Context context) {
+        // 从缓存中获取当前用户
+        String token = SPUtils.getInstance(context).getString(USER_TOKEN, "");
+        if (token != null && !token.isEmpty()) {
+            User user = JWTUtil.extractUserFromToken(token);
+            return user;
+        }
+        return null;
+    }
+
     private boolean isValid(String password, String passwordInDB) {
-        // TODO 明文验证
-        return password.equals(passwordInDB);
+        // 密文验证
+        try {
+            return PasswordEncryptUtil.verifyPassword(password, passwordInDB);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

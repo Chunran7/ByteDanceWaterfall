@@ -1,10 +1,15 @@
 package com.team.bytedancewaterfall.activity;
 
-import static com.team.bytedancewaterfall.utils.PurchaseUtils.showToast;
 
+
+import static com.team.bytedancewaterfall.activity.LoginActivity.USER_TOKEN;
+
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,7 +18,11 @@ import com.bumptech.glide.Glide;
 import com.team.bytedancewaterfall.R;
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 import com.team.bytedancewaterfall.adapter.FeedScrollAdapter;
+import com.team.bytedancewaterfall.data.pojo.entity.User;
 import com.team.bytedancewaterfall.data.service.impl.CartServiceImpl;
+import com.team.bytedancewaterfall.data.service.impl.UserServiceImpl;
+import com.team.bytedancewaterfall.utils.SPUtils;
+import com.team.bytedancewaterfall.utils.ToastUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -46,6 +55,7 @@ public class FeedScrollActivity extends AppCompatActivity {
     private boolean isLoading = false; // 标记是否正在加载数据
     private static final int VISIBLE_THRESHOLD = 5; // 预加载阈值
 
+    private static FeedItem currentOperatingFeedItem;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -183,18 +193,40 @@ public class FeedScrollActivity extends AppCompatActivity {
                 intent.putExtra(DetailActivity.EXTRA_FEED_ITEM, feedItem);
                 startActivity(intent);
             }
-
+            private ActivityResultLauncher<Intent> loginLauncher = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == RESULT_OK) {
+                            // 登录成功，重新获取当前用户并继续购物车操作
+                            User user = UserServiceImpl.getInstance().getCurrentUser(FeedScrollActivity.this);
+                            if (user != null) {
+                                // 可以在这里执行添加到购物车的逻辑
+                                user = UserServiceImpl.getInstance().getCurrentUser(FeedScrollActivity.this);
+                                if (user == null) {
+                                    ToastUtils.showShortToast(FeedScrollActivity.this, "请先登录");
+                                    return;
+                                }
+                                // 预留加入购物车方法调用
+                                CartServiceImpl.getInstance().addCart(FeedScrollActivity.this, currentOperatingFeedItem, user.getId());
+                            }
+                        }
+                    }
+            );
             @Override
             public void onAddToCartClick(int position, FeedItem feedItem) {
-                // TODO 用户暂时写死
-                // 预留加入购物车方法调用
-                boolean b = CartServiceImpl.getInstance().addCartItem(FeedScrollActivity.this, feedItem.getId(), "0001");
-                if (b) {
-                    // 显示Toast提示
-                    showToast(FeedScrollActivity.this, "加入购物车成功");
-                } else {
-                    showToast(FeedScrollActivity.this, "加入购物车成功");
+//                SPUtils.getInstance(FeedScrollActivity.this).remove(USER_TOKEN);
+                // 获取当前用户
+                User user = UserServiceImpl.getInstance().getCurrentUser(FeedScrollActivity.this);
+                if (user == null) {
+                    // 保存当前要操作的商品信息
+                    currentOperatingFeedItem = feedItem;
+                    // 跳转到登录页面等待结果
+                    Intent intent = new Intent(FeedScrollActivity.this, LoginActivity.class);
+                    loginLauncher.launch(intent);
+                    return;
                 }
+                // 加入购物车方法调用
+                CartServiceImpl.getInstance().addCart(FeedScrollActivity.this, feedItem, user.getId());
             }
 
             @Override
@@ -202,7 +234,6 @@ public class FeedScrollActivity extends AppCompatActivity {
                 // TODO 预留立即购买方法调用
             }
         });
-
         // 滚动到指定位置，确保点击的feeditem直接显示在屏幕顶部
         if (startIndex >= 0 && startIndex < feedItems.size()) {
             // 使用scrollToPosition直接定位到起始索引位置
@@ -220,7 +251,6 @@ public class FeedScrollActivity extends AppCompatActivity {
             });
         }
     }
-    
     /**
      * 加载更多数据，实现循环加载功能
      */
