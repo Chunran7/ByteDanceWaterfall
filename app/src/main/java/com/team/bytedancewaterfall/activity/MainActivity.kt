@@ -162,13 +162,13 @@ class MainActivity : AppCompatActivity() {
                 val newData = feedService.getFeedList(this)
                 if (newData.isNotEmpty()) {
                     if (isRefresh) {
-                        val oldSize = feedList.size
                         feedList.clear()
-                        feedAdapter.notifyItemRangeRemoved(0, oldSize)
                         feedList.addAll(newData)
-                        feedAdapter.notifyItemRangeInserted(0, newData.size)
-                        recyclerView.scrollToPosition(0) // 刷新后滚动到顶部
-                        Log.d(TAG, "刷新完成，共 ${newData.size} 条")
+
+                        feedAdapter.notifyDataSetChanged()
+
+                        recyclerView.scrollToPosition(0)
+                        Log.d(TAG, "刷新完成...")
                     } else {
                         val oldSize = feedList.size
                         feedList.addAll(newData)
