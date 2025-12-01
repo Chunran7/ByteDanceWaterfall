@@ -33,7 +33,7 @@ public class PasswordEncryptUtil {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[SALT_LENGTH];
         random.nextBytes(salt);
-        return Base64.encodeToString(salt, Base64.DEFAULT);
+        return Base64.encodeToString(salt, Base64.NO_WRAP);
     }
     
     /**
