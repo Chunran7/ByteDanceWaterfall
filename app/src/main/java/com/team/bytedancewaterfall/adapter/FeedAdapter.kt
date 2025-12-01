@@ -46,30 +46,29 @@ class FeedAdapter(private val feedItems: List<FeedItem>) :
         val item = feedItems[position]
 
         val imageView = holder.cover
-        // 使用Glide加载图片，并通过CustomTarget获取图片原始尺寸
+        
+        // 1. 获取屏幕宽度的一半 (或者列宽)
+        val screenWidth = holder.itemView.context.resources.displayMetrics.widthPixels
+        val itemWidth = (screenWidth - 20) / 2 // 假设间距大概是 20px，你需要根据实际 padding 调整
+        
+        // 2. 【核心】根据宽高比，算出图片应有的高度
+        // 公式：目标高度 = (图片原高 / 图片原宽) * 卡片实际宽
+        // 注意：由于我们的图片是drawable资源，无法预先知道真实尺寸，这里使用固定比例
+        val targetHeight = (itemWidth * 0.75).toInt() // 假设图片比例为4:3
+
+        // 3. 【核心】在加载图片前，先强制把 ImageView 的高度拉伸到位！
+        // 这样 Glide 加载慢也不会导致布局跳动，因为坑位已经占好了
+        val layoutParams = holder.cover.layoutParams
+        layoutParams.width = itemWidth
+        layoutParams.height = targetHeight
+        holder.cover.layoutParams = layoutParams
+
+        // 4. 然后再加载图片
         Glide.with(holder.itemView.context)
             .load(item.imageUrl)
-            .into(object : CustomTarget<Drawable>() {
-                override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
-                    // 图片加载成功，计算宽高比
-                    val aspectRatio = resource.intrinsicHeight.toFloat() / resource.intrinsicWidth.toFloat()
-
-                    // 获取ImageView的布局参数
-                    val layoutParams = imageView.layoutParams
-                    // 根据ImageView的当前宽度（由StaggeredGridLayoutManager确定）和宽高比，计算出目标高度
-                    layoutParams.height = (imageView.width * aspectRatio).toInt()
-                    // 将新的高度应用到布局参数
-                    imageView.layoutParams = layoutParams
-
-                    // 将加载好的图片设置到ImageView中
-                    imageView.setImageDrawable(resource)
-                }
-
-                override fun onLoadCleared(placeholder: Drawable?) {
-                    // 可选：在图片被清除时进行处理
-                    imageView.setImageDrawable(placeholder)
-                }
-            })
+            .override(itemWidth, targetHeight) // 精准加载，省内存
+            .placeholder(R.color.gray_light) // 占位图
+            .into(holder.cover)
 
         holder.description.text = item.description
 

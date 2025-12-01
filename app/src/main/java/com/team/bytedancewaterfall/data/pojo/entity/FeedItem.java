@@ -39,8 +39,14 @@ public class FeedItem implements Serializable {
     private String price;
     private List<String> tags;
     private String videoUrl;
+    
+    // 添加图片宽高字段，用于预计算布局高度
+    private int imgWidth = 800;   // 默认图片宽度
+    private int imgHeight = 600;  // 默认图片高度
+    
     public FeedItem() {
     }
+    
     public FeedItem(String id, int type, String imageUrl, String title, String description, String price, List<String> tags, String videoUrl) {
         this.id = id;
         this.type = type;
@@ -51,12 +57,24 @@ public class FeedItem implements Serializable {
         this.tags = tags;
         this.videoUrl = videoUrl;
     }
+    
     public FeedItem(String id, int type, String imageUrl, String title){
         this.id = id;
         this.type = type;
         this.imageUrl = imageUrl;
         this.title = title;
     }
+    
+    // 添加构造函数，包含图片宽高信息
+    public FeedItem(String id, int type, String imageUrl, String title, int imgWidth, int imgHeight) {
+        this.id = id;
+        this.type = type;
+        this.imageUrl = imageUrl;
+        this.title = title;
+        this.imgWidth = imgWidth;
+        this.imgHeight = imgHeight;
+    }
+    
     public String getId() {
         return id;
     }
@@ -120,6 +138,23 @@ public class FeedItem implements Serializable {
     public void setVideoUrl(String videoUrl) {
         this.videoUrl = videoUrl;
     }
+    
+    // 图片宽高相关getter和setter方法
+    public int getImgWidth() {
+        return imgWidth;
+    }
+    
+    public void setImgWidth(int imgWidth) {
+        this.imgWidth = imgWidth;
+    }
+    
+    public int getImgHeight() {
+        return imgHeight;
+    }
+    
+    public void setImgHeight(int imgHeight) {
+        this.imgHeight = imgHeight;
+    }
 
     @Override
     public String toString() {
@@ -132,6 +167,8 @@ public class FeedItem implements Serializable {
                 ", price='" + price + '\'' +
                 ", tags=" + tags +
                 ", videoUrl='" + videoUrl + '\'' +
+                ", imgWidth=" + imgWidth +
+                ", imgHeight=" + imgHeight +
                 '}';
     }
 

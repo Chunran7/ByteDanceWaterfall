@@ -89,6 +89,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         feedService = FeedServiceImpl.getInstance()
         layoutManager = StaggeredGridLayoutManager(SPAN_COUNT, StaggeredGridLayoutManager.VERTICAL)
+        // 【修改】改回 NONE，保证了 Item 一旦安放，位置就绝对锁定，不会乱跳
         layoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
         recyclerView.layoutManager = layoutManager
 
@@ -166,6 +167,10 @@ class MainActivity : AppCompatActivity() {
                         feedList.addAll(newData)
 
                         feedAdapter.notifyDataSetChanged()
+                        
+                        // 【关键】强制重置瀑布流的 Span 计算
+                        // 因为我们把策略改成了 NONE，所以在全量替换数据时，要手动喊它重新算一遍
+                        layoutManager.invalidateSpanAssignments() 
 
                         recyclerView.scrollToPosition(0)
                         Log.d(TAG, "刷新完成...")
