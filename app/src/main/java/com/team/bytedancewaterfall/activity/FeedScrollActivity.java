@@ -20,6 +20,7 @@ import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 import com.team.bytedancewaterfall.adapter.FeedScrollAdapter;
 import com.team.bytedancewaterfall.data.pojo.entity.User;
 import com.team.bytedancewaterfall.data.service.impl.CartServiceImpl;
+import com.team.bytedancewaterfall.data.service.impl.FeedServiceImpl;
 import com.team.bytedancewaterfall.data.service.impl.UserServiceImpl;
 import com.team.bytedancewaterfall.utils.SPUtils;
 import com.team.bytedancewaterfall.utils.ToastUtils;
@@ -54,6 +55,9 @@ public class FeedScrollActivity extends AppCompatActivity {
     private int batchSize = 10; // 每次加载的数据量
     private boolean isLoading = false; // 标记是否正在加载数据
     private static final int VISIBLE_THRESHOLD = 5; // 预加载阈值
+    
+    // 添加currentPage变量用于分页
+    private int currentPage = 1; 
 
     private static FeedItem currentOperatingFeedItem;
     @Override
@@ -252,10 +256,10 @@ public class FeedScrollActivity extends AppCompatActivity {
         }
     }
     /**
-     * 加载更多数据，实现循环加载功能
+     * 加载更多数据，实现分页加载功能
      */
     private void loadMoreData() {
-        if (isLoading || originalFeedItems.isEmpty()) {
+        if (isLoading) {
             return;
         }
         
@@ -265,16 +269,17 @@ public class FeedScrollActivity extends AppCompatActivity {
         mainHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                List<FeedItem> newItems = new ArrayList<>();
+                // 从服务中获取下一页数据
+                List<FeedItem> newItems = FeedServiceImpl.getInstance().pageQueryFeedList(FeedScrollActivity.this, currentPage, batchSize);
                 
-                // 从currentDataIndex开始，循环添加数据
-                for (int i = 0; i < batchSize && !originalFeedItems.isEmpty(); i++) {
-                    if (currentDataIndex >= originalFeedItems.size()) {
-                        currentDataIndex = 0; // 循环从头开始
-                    }
-                    newItems.add(originalFeedItems.get(currentDataIndex));
-                    currentDataIndex++;
+                // 如果没有更多数据，则重置到第一页
+                if (newItems.isEmpty()) {
+                    currentPage = 1;
+                    newItems = FeedServiceImpl.getInstance().pageQueryFeedList(FeedScrollActivity.this, currentPage, batchSize);
                 }
+                
+                // 增加页码，以便下次加载下一页
+                currentPage++;
                 
                 // 添加新数据到列表
                 int startPosition = feedItems.size();
