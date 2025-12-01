@@ -9,4 +9,5 @@
     <color name="teal_700">#FF018786</color>
     <color name="red">#FF0000</color>
     <color name="gray_light">#FFEEEEEE</color>
+    <color name="background_color">#FFEEEEEE</color>
 </resources>
