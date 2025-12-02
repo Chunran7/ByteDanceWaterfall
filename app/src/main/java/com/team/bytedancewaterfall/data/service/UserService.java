@@ -9,4 +9,5 @@ public interface UserService {
     String userLogin(Context context, LoginDTO loginDTO);
 
     User getCurrentUser(Context context);
+    User getUserByToken(Context context, String token);
 }

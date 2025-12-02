@@ -60,6 +60,15 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
+    @Override
+    public User getUserByToken(Context context, String token) {
+        User user = null;
+        if (!token.isEmpty()) {
+            user = JWTUtil.extractUserFromToken(token);
+        }
+        return user;
+    }
+
     private boolean isValid(String password, String passwordInDB) {
         // 密文验证
         try {
