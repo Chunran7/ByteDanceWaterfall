@@ -24,7 +24,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CartActivity extends AppCompatActivity implements CartAdapter.OnSelectChangeListener {
+public class CartActivity extends BaseBottomNavActivity implements CartAdapter.OnSelectChangeListener {
 
     private RecyclerView recyclerView;
     private TextView totalPriceTextView;
@@ -56,6 +56,9 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnSel
         
         // 设置监听器
         setupListeners();
+        
+        // 初始化底部导航栏
+        initBottomNavigation();
     }
 
     @Override

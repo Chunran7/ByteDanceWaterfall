@@ -26,7 +26,7 @@ import com.team.bytedancewaterfall.data.vurtualData.FeedItemData
  * 主界面Activity
  * 负责展示瀑布流内容，处理异构布局和用户交互
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseBottomNavActivity() {
 
     // UI组件
     private lateinit var recyclerView: RecyclerView
@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
         setupSwipeRefresh()
         fetchData(isRefresh = true, isInitialLoad = true) // 初始加载
+        initBottomNavigation();
     }
 
     private fun setupSystemUI() {

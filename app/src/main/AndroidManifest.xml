@@ -43,6 +43,8 @@
         <activity android:name=".activity.LoginActivity"/>
         <activity android:name=".activity.RegisterActivity"/>
         <activity android:name=".activity.CartActivity"/>
+        <activity android:name=".activity.BaseBottomNavActivity"/>
+        <activity android:name=".activity.MyInfoActivity"/>
         <!--提供安全的文件共享机制，允许应用向其他应用临时授权访问本地文件-->
         <provider
             android:name="androidx.core.content.FileProvider"
