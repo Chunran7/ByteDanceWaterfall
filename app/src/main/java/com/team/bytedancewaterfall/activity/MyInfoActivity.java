@@ -33,6 +33,7 @@ public class MyInfoActivity extends BaseBottomNavActivity {
     private ImageView userIconView;
     private TextView userNameView;
     private Button logoutButton;
+    private Button logintButton;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +46,7 @@ public class MyInfoActivity extends BaseBottomNavActivity {
         initView();
         setView();
         setListener();
+        updateLoginBotton();
         initBottomNavigation();
     }
 
@@ -77,6 +79,13 @@ public class MyInfoActivity extends BaseBottomNavActivity {
                         })
                         .create()
                         .show();
+            }
+        });
+        logintButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MyInfoActivity.this, LoginActivity.class);
+                startActivity(intent);
             }
         });
         // 浏览历史按钮监听
@@ -162,5 +171,19 @@ public class MyInfoActivity extends BaseBottomNavActivity {
         userIconView = findViewById(R.id.user_icon);
         userNameView = findViewById(R.id.user_name);
         logoutButton = findViewById(R.id.login_out);
+        logintButton = findViewById(R.id.login_btn);
+    }
+    private void updateLoginBotton() {
+        // 判断当前是否已登录
+        boolean isLogin = UserServiceImpl.getInstance().getCurrentUser(this) != null;
+        if (isLogin) {
+            // 已登录，显示登出按钮
+            logoutButton.setVisibility(View.VISIBLE);
+            logintButton.setVisibility(View.GONE);
+        }else {
+            // 未登录，显示登录按钮
+            logoutButton.setVisibility(View.GONE);
+            logintButton.setVisibility(View.VISIBLE);
+        }
     }
 }
