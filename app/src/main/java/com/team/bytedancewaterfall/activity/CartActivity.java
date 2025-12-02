@@ -1,5 +1,6 @@
 package com.team.bytedancewaterfall.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +33,8 @@ public class CartActivity extends BaseBottomNavActivity implements CartAdapter.O
     private TextView selectAllTextView;
     private View emptyCartView;
     private TextView cartCountTextView;
+    private TextView emptyCartText;
+    private View bottomBar;
     
     private CartAdapter cartAdapter;
     private List<CartAndFeed> cartList;
@@ -44,7 +47,7 @@ public class CartActivity extends BaseBottomNavActivity implements CartAdapter.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
-
+        
         // 初始化视图
         initView();
         
@@ -67,18 +70,18 @@ public class CartActivity extends BaseBottomNavActivity implements CartAdapter.O
         // 在Activity恢复时重新加载购物车数据，确保数据最新
         try {
             User user = UserServiceImpl.getInstance().getCurrentUser(this);
+            // 清空购物车列表，避免数据残留
+            cartList.clear();
+            
             if (user != null) {
+                // 用户已登录，从数据库加载购物车数据
                 List<CartAndFeed> tempList = CartServiceImpl.getInstance().getListByUserIdWithFeedItem(this, user.getId());
                 if (tempList != null && !tempList.isEmpty()) {
                     cartList = tempList;
-                } else {
-                    // 使用模拟数据作为备份
-                    cartList = generateMockData();
                 }
-            } else {
-                // 使用模拟数据作为备份
-                cartList = generateMockData();
+                // 如果购物车为空，不使用模拟数据，将在updateEmptyCartStatus中处理
             }
+            // 如果用户未登录，购物车列表保持为空
             
             // 重新设置适配器数据
             if (cartAdapter != null) {
@@ -92,8 +95,8 @@ public class CartActivity extends BaseBottomNavActivity implements CartAdapter.O
         } catch (Exception e) {
             e.printStackTrace();
             ToastUtils.showShortToast(this, "加载购物车数据失败");
-            // 使用模拟数据作为备份
-            cartList = generateMockData();
+            // 清空购物车列表，显示空状态
+            cartList.clear();
             if (cartAdapter != null) {
                 cartAdapter.setData(cartList);
             }
@@ -109,6 +112,10 @@ public class CartActivity extends BaseBottomNavActivity implements CartAdapter.O
         checkoutButton = findViewById(R.id.settle_button);
         selectAllTextView = findViewById(R.id.select_all_text_view);
         emptyCartView = findViewById(R.id.empty_cart_view);
+        emptyCartText = findViewById(R.id.empty_cart_text);
+        bottomBar = findViewById(R.id.bottom_bar);
+        
+        // 按钮点击事件已在updateEmptyCartStatus方法中动态设置
         
         // 添加新的视图引用
         itemCountTextView = findViewById(R.id.item_count_text_view);
@@ -123,32 +130,33 @@ public class CartActivity extends BaseBottomNavActivity implements CartAdapter.O
         backButton.setOnClickListener(v -> finish());
     }
 
+    /**
+     * 初始化数据
+     */
     private void initData() {
-        cartList = new ArrayList<>();
-        
         try {
-            // 从数据库加载购物车数据
+            // 检查登录状态
             User user = UserServiceImpl.getInstance().getCurrentUser(this);
             if (user != null) {
+                // 用户已登录，从数据库获取购物车数据
                 List<CartAndFeed> tempList = CartServiceImpl.getInstance().getListByUserIdWithFeedItem(this, user.getId());
-                if (tempList != null && !tempList.isEmpty()) {
+                // 确保列表不为null
+                if (tempList != null) {
                     cartList = tempList;
+                } else {
+                    cartList = new ArrayList<>();
                 }
+            } else {
+                // 用户未登录，清空购物车列表
+                cartList = new ArrayList<>();
             }
-            
-            if (cartList.isEmpty()) {
-                // 使用模拟数据作为备份
-                cartList = generateMockData();
-            }
-            
             updateCartCount();
             updateEmptyCartStatus();
-            
         } catch (Exception e) {
             e.printStackTrace();
             ToastUtils.showShortToast(this, "加载购物车数据失败");
-            // 使用模拟数据作为备份
-            cartList = generateMockData();
+            // 发生异常时，显示空购物车
+            cartList = new ArrayList<>();
             updateCartCount();
             updateEmptyCartStatus();
         }
@@ -156,65 +164,8 @@ public class CartActivity extends BaseBottomNavActivity implements CartAdapter.O
 
     // loadCartData方法已在onResume中重写实现，此处移除冗余方法
 
-    private List<CartAndFeed> generateMockData() {
-        List<CartAndFeed> mockList = new ArrayList<>();
-        
-        // 模拟数据
-        CartAndFeed item1 = new CartAndFeed();
-        item1.setProductId("1");
-        item1.setProductName("模拟数据超级立减鸭鸭时尚连帽中长款羽绒服");
-        item1.setProductDesc("燕麦色XL[135-150斤]");
-        item1.setPrice(399.0);
-        item1.setOriginalPrice(599.0);
-        item1.setCount(1);
-        item1.setImageUrl("drawable/test1_0");
-        item1.setShopName("天猫 鸭鸭官方旗舰店");
-        item1.setSelected(false);
-        mockList.add(item1);
+    // 模拟数据生成方法已移除，现在完全依赖数据库获取数据
 
-        CartAndFeed item2 = new CartAndFeed();
-        item2.setProductId("2");
-        item2.setProductName("鸭鸭羽绒服男连帽中长款外套");
-        item2.setProductDesc("正黑色/正黑色5522");
-        item2.setPrice(299.0);
-        item2.setOriginalPrice(399.0);
-        item2.setCount(1);
-        item2.setImageUrl("drawable/test1_1");
-        item2.setShopName("天猫 鸭鸭官方旗舰店");
-        item2.setSelected(false);
-        mockList.add(item2);
-
-        CartAndFeed item3 = new CartAndFeed();
-        item3.setProductId("3");
-        item3.setProductName("伊利早餐奶麦香核桃味");
-        item3.setProductDesc("11月产-麦香味250ml*24盒");
-        item3.setPrice(62.4);
-        item3.setOriginalPrice(67.4);
-        item3.setCount(1);
-        item3.setImageUrl("drawable/test2_1");
-        item3.setShopName("天猫 伊利利航专卖店");
-        item3.setSelected(false);
-        mockList.add(item3);
-
-        // 添加更多模拟数据
-        CartAndFeed item4 = new CartAndFeed();
-        item4.setProductId("4");
-        item4.setProductName("安踏毒刺6代跑步鞋");
-        item4.setProductDesc("正黑色/仓黑色5522");
-        item4.setPrice(147.13);
-        item4.setOriginalPrice(187.0);
-        item4.setCount(1);
-        item4.setImageUrl("drawable/test1_3");
-        item4.setShopName("天猫 隽维运动专营店");
-        item4.setSelected(false);
-        mockList.add(item4);
-        
-        // 也更新成员变量cartList
-        cartList.clear();
-        cartList.addAll(mockList);
-        
-        return mockList;
-    }
 
     private void setupAdapter() {
         cartAdapter = new CartAdapter(this, cartList);
@@ -297,15 +248,47 @@ public class CartActivity extends BaseBottomNavActivity implements CartAdapter.O
         }
     }
 
+    /**
+     * 更新空购物车状态
+     */
     private void updateEmptyCartStatus() {
-        if (cartList.isEmpty()) {
-            emptyCartView.setVisibility(View.VISIBLE);
-            recyclerView.setVisibility(View.GONE);
-            findViewById(R.id.bottom_bar).setVisibility(View.GONE);
-        } else {
-            emptyCartView.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
-            findViewById(R.id.bottom_bar).setVisibility(View.VISIBLE);
+        // 检查是否登录
+        boolean isLoggedIn = UserServiceImpl.getInstance().getCurrentUser(this) != null;
+        
+        // 空状态判断：未登录或购物车为空
+        boolean isEmptyState = !isLoggedIn || cartList.isEmpty();
+        
+        // 更新视图可见性
+        recyclerView.setVisibility(isEmptyState ? View.GONE : View.VISIBLE);
+        bottomBar.setVisibility(isEmptyState ? View.GONE : View.VISIBLE);
+        emptyCartView.setVisibility(isEmptyState ? View.VISIBLE : View.GONE);
+        
+        // 根据登录状态更新空状态UI
+        TextView emptyCartText = findViewById(R.id.empty_cart_text);
+        Button goShoppingButton = findViewById(R.id.go_shopping_button);
+        
+        if (emptyCartText != null && goShoppingButton != null) {
+            if (!isLoggedIn) {
+                // 用户未登录状态
+                emptyCartText.setText("请先登录，查看您的购物车");
+                goShoppingButton.setText("去登录");
+                // 设置登录按钮点击事件
+                goShoppingButton.setOnClickListener(v -> {
+                    // 跳转到登录页面
+                    Intent intent = new Intent(CartActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                });
+            } else {
+                // 用户已登录但购物车为空
+                emptyCartText.setText("购物车还是空的，快去添加商品吧");
+                goShoppingButton.setText("去逛逛");
+                // 设置去逛逛按钮点击事件
+                goShoppingButton.setOnClickListener(v -> {
+                    // 跳转到首页
+                    Intent intent = new Intent(CartActivity.this, MainActivity.class);
+                    startActivity(intent);
+                });
+            }
         }
     }
 
