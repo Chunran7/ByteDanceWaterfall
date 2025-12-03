@@ -6,7 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.alibaba.fastjson2.JSON;
@@ -168,29 +167,39 @@ public class FeedItemDatabaseHelper{
      * @return
      */
     public FeedItem getFeedItemById(String id) {
-        Cursor cursor = db.query(TABLE_NOTES, null, "id=?", new String[]{id}, null, null, null);
+        Cursor cursor = null;
         FeedItem item = null;
-        if (cursor != null && cursor.moveToFirst()) {
-            item = new FeedItem();
-            item.setId(cursor.getString(cursor.getColumnIndexOrThrow("id")));
-            item.setType(cursor.getInt(cursor.getColumnIndexOrThrow("type")));
-            item.setImageUrl(cursor.getString(cursor.getColumnIndexOrThrow("imageUrl")));
-            item.setTitle(cursor.getString(cursor.getColumnIndexOrThrow("title")));
-            item.setDescription(cursor.getString(cursor.getColumnIndexOrThrow("description")));
-            item.setPrice(cursor.getString(cursor.getColumnIndexOrThrow("price")));
+        try {
+            cursor = db.query(TABLE_NOTES, null, "id=?", new String[]{id}, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                item = new FeedItem();
+                item.setId(cursor.getString(cursor.getColumnIndexOrThrow("id")));
+                item.setType(cursor.getInt(cursor.getColumnIndexOrThrow("type")));
+                item.setImageUrl(cursor.getString(cursor.getColumnIndexOrThrow("imageUrl")));
+                item.setTitle(cursor.getString(cursor.getColumnIndexOrThrow("title")));
+                item.setDescription(cursor.getString(cursor.getColumnIndexOrThrow("description")));
+                item.setPrice(cursor.getString(cursor.getColumnIndexOrThrow("price")));
 
-            // 反序列化tags字段
-            String tagsString = cursor.getString(cursor.getColumnIndexOrThrow("tags"));
-            if (tagsString != null && !tagsString.isEmpty()) {
-                try {
-                    List<String> tags = JSON.parseObject(tagsString, new com.alibaba.fastjson2.TypeReference<List<String>>() {});
-                    item.setTags(tags);
-                }catch (Exception e){
-                    Log.e(TAG, "Failed to parse tags", e);
+                // 反序列化tags字段
+                String tagsString = cursor.getString(cursor.getColumnIndexOrThrow("tags"));
+                if (tagsString != null && !tagsString.isEmpty()) {
+                    try {
+                        List<String> tags = JSON.parseObject(tagsString, new com.alibaba.fastjson2.TypeReference<List<String>>() {});
+                        item.setTags(tags);
+                    }catch (Exception e){
+                        Log.e(TAG, "Failed to parse tags", e);
+                    }
                 }
+                item.setVideoUrl(cursor.getString(cursor.getColumnIndexOrThrow("videoUrl")));
             }
-            item.setVideoUrl(cursor.getString(cursor.getColumnIndexOrThrow("videoUrl")));
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Error querying feed item by id", e);
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
         }
+
         return item;
     }
 
@@ -256,33 +265,47 @@ public class FeedItemDatabaseHelper{
      * @return
      */
     public List<FeedItem> pageQueryFeedList(Integer page, Integer size) {
-        String sql = "SELECT * FROM " + TABLE_NOTES + " LIMIT ?, ?";
-        String limit = String.format("%d, %d", (page - 1) * size, size);
-        Cursor cursor = db.rawQuery(sql, new String[]{limit});
+        if (page == null || page < 1) {
+            page = 1;
+        }
+        if (size == null || size < 1) {
+            size = 10;
+        }
+        int offset = (page - 1) * size;
+        String sql = "SELECT * FROM " + TABLE_NOTES + " LIMIT ? OFFSET ?";
+        Cursor cursor = null;
         List<FeedItem> feedItems = new ArrayList<>();
-        if (cursor != null && cursor.moveToFirst()) {
-            // 获取列索引，提高查询效率
-            int idIndex = cursor.getColumnIndexOrThrow("id");
-            int typeIndex = cursor.getColumnIndexOrThrow("type");
-            int imageUrlIndex = cursor.getColumnIndexOrThrow("imageUrl");
-            int titleIndex = cursor.getColumnIndexOrThrow("title");
-            int descriptionIndex = cursor.getColumnIndexOrThrow("description");
-            int priceIndex = cursor.getColumnIndexOrThrow("price");
-            int tagsIndex = cursor.getColumnIndexOrThrow("tags");
-            int videoUrlIndex = cursor.getColumnIndexOrThrow("videoUrl");
-            do {
-                FeedItem item = new FeedItem();
-                item.setId(cursor.getString(idIndex));
-                item.setType(cursor.getInt(typeIndex));
-                item.setImageUrl(cursor.getString(imageUrlIndex));
-                item.setTitle(cursor.getString(titleIndex));
-                item.setDescription(cursor.getString(descriptionIndex));
-                item.setPrice(cursor.getString(priceIndex));
-                item.setTags(JSON.parseObject(cursor.getString(tagsIndex), new com.alibaba.fastjson2.TypeReference<List<String>>() {}));
-                item.setVideoUrl(cursor.getString(videoUrlIndex));
-                feedItems.add(item);
-                cursor.moveToNext();
-            } while (cursor.moveToNext());
+        try {
+            cursor = db.rawQuery(sql, new String[]{String.valueOf(size), String.valueOf(offset)});
+            if (cursor != null && cursor.moveToFirst()) {
+                // 获取列索引，提高查询效率
+                int idIndex = cursor.getColumnIndexOrThrow("id");
+                int typeIndex = cursor.getColumnIndexOrThrow("type");
+                int imageUrlIndex = cursor.getColumnIndexOrThrow("imageUrl");
+                int titleIndex = cursor.getColumnIndexOrThrow("title");
+                int descriptionIndex = cursor.getColumnIndexOrThrow("description");
+                int priceIndex = cursor.getColumnIndexOrThrow("price");
+                int tagsIndex = cursor.getColumnIndexOrThrow("tags");
+                int videoUrlIndex = cursor.getColumnIndexOrThrow("videoUrl");
+                do {
+                    FeedItem item = new FeedItem();
+                    item.setId(cursor.getString(idIndex));
+                    item.setType(cursor.getInt(typeIndex));
+                    item.setImageUrl(cursor.getString(imageUrlIndex));
+                    item.setTitle(cursor.getString(titleIndex));
+                    item.setDescription(cursor.getString(descriptionIndex));
+                    item.setPrice(cursor.getString(priceIndex));
+                    item.setTags(JSON.parseObject(cursor.getString(tagsIndex), new com.alibaba.fastjson2.TypeReference<List<String>>() {}));
+                    item.setVideoUrl(cursor.getString(videoUrlIndex));
+                    feedItems.add(item);
+                } while (cursor.moveToNext());
+            }
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Error querying feed items with pagination", e);
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
         }
         return feedItems;
     }
