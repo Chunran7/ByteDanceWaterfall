@@ -121,7 +121,7 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
         TextView priceView;
         Button addToCartButton;
         Button buyNowButton;
-        PlayerView playerView;
+        View playerView;
         ExoPlayer player;
 
         /**
@@ -485,31 +485,25 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
             return;
         }
         
-        if (holder.playerView != null) {
+        if (holder.playerView != null && holder.playerView instanceof PlayerView) {
             holder.imageView.setVisibility(View.GONE);
-            holder.playerView.setVisibility(View.VISIBLE);
-            
+            ((PlayerView) holder.playerView).setVisibility(View.VISIBLE);
+
             // 使用MediaLoaderUtils创建播放器
             holder.player = MediaLoaderUtils.createExoPlayer(
                     holder.itemView.getContext(),
-                    holder.playerView,
+                    (PlayerView) holder.playerView,
                     item.getVideoUrl(),
                     isAppInForeground,
                     new Player.Listener() {
                         @Override
                         public void onPlaybackStateChanged(int playbackState) {
                             // 可以在这里处理不同的播放状态
-                            if (playbackState == Player.STATE_BUFFERING) {
-                                // 缓冲中，可以显示加载指示器
-                            } else if (playbackState == Player.STATE_READY) {
-                                // 准备就绪
-                            }
                         }
                         
                         @Override
                         public void onPlayerError(PlaybackException error) {
                             // 处理播放错误
-                            // 可以尝试重新播放或降级播放质量
                         }
                     }
             );
