@@ -15,12 +15,15 @@
         android:scaleType="centerCrop"
         android:contentDescription="Feed图片" />
     
-    <!-- 视频播放区域 (临时替换为 FrameLayout 避免因 media3 PlayerView 导致的 Inflate 崩溃) -->
-    <FrameLayout
+    <!-- 视频播放区域 -->
+    <androidx.media3.ui.PlayerView
         android:id="@+id/item_player_view"
         android:layout_width="match_parent"
         android:layout_height="400dp"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:use_controller="true"
+        app:show_buffering="when_playing"
+        app:resize_mode="fit" />
 
     <!-- 底部信息区域 -->
     <LinearLayout

@@ -121,7 +121,7 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
         TextView priceView;
         Button addToCartButton;
         Button buyNowButton;
-        View playerView;
+        PlayerView playerView;
         ExoPlayer player;
 
         /**
@@ -485,14 +485,14 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
             return;
         }
         
-        if (holder.playerView != null && holder.playerView instanceof PlayerView) {
+        if (holder.playerView != null) {
             holder.imageView.setVisibility(View.GONE);
-            ((PlayerView) holder.playerView).setVisibility(View.VISIBLE);
+            holder.playerView.setVisibility(View.VISIBLE);
 
             // 使用MediaLoaderUtils创建播放器
             holder.player = MediaLoaderUtils.createExoPlayer(
                     holder.itemView.getContext(),
-                    (PlayerView) holder.playerView,
+                    holder.playerView,
                     item.getVideoUrl(),
                     isAppInForeground,
                     new Player.Listener() {
@@ -531,3 +531,4 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
         players.clear();
     }
 }
+

@@ -21,9 +21,6 @@ import com.team.bytedancewaterfall.data.service.impl.FeedServiceImpl;
 import com.team.bytedancewaterfall.data.service.impl.UserServiceImpl;
 import com.team.bytedancewaterfall.utils.ToastUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,35 +60,19 @@ public class FeedScrollActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 临时捕获所有 onCreate 启动时可能抛出的异常并记录到文件，便于调试崩溃原因
-        try {
-            setContentView(R.layout.feed_scroll_activity);
+        setContentView(R.layout.feed_scroll_activity);
 
-            // 初始化视图
-            initViews();
+        // 初始化视图
+        initViews();
 
-            // 获取传递的数据
-            getIntentData();
+        // 获取传递的数据
+        getIntentData();
 
-            // 设置适配器
-            setupRecyclerView();
+        // 设置适配器
+        setupRecyclerView();
 
-            // 加载初始数据
-            loadInitialData();
-        } catch (Throwable t) {
-            t.printStackTrace();
-            try {
-                File out = new File(getFilesDir(), "feed_scroll_crash.txt");
-                PrintWriter pw = new PrintWriter(new FileOutputStream(out));
-                t.printStackTrace(pw);
-                pw.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            ToastUtils.showShortToast(this, "FeedScrollActivity 启动异常，已写入: " + new File(getFilesDir(), "feed_scroll_crash.txt").getAbsolutePath());
-            // 关闭 Activity，避免处于不稳定状态
-            finish();
-        }
+        // 加载初始数据
+        loadInitialData();
     }
     
     @Override
