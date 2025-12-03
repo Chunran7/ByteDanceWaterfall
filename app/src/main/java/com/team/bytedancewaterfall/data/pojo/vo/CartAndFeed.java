@@ -4,6 +4,7 @@ import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 
 public class CartAndFeed extends FeedItem {
     // 购物车中商品数量
+    private String id;
     private Integer count;
     private String totalPrice;
     private String productId;
@@ -16,6 +17,16 @@ public class CartAndFeed extends FeedItem {
     private boolean hasDiscount = false;
     private String discountInfo;
     private Integer stock;
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public CartAndFeed() {
     }

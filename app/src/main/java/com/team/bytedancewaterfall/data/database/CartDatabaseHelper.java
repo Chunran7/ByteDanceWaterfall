@@ -166,7 +166,7 @@ public class CartDatabaseHelper {
         List<CartAndFeed> cartList = new ArrayList<>();
         Cursor cursor = null;
         try {
-            String sql = "select cart.count, feed.type, feed.imageUrl,feed.title, feed.description, feed.price, feed.tags, feed.videoUrl" +
+            String sql = "select cart.id,cart.feedItemId, cart.count, feed.type, feed.imageUrl,feed.title, feed.description, feed.price, feed.tags, feed.videoUrl" +
                     " from " + CartDatabaseHelper.TABLE_NOTES + " as cart " +
                     "left join " + FeedItemDatabaseHelper.TABLE_NOTES + " as feed " +
                     "on cart." + CartDatabaseHelper.COLUMN_FEED_ITEM_ID + " = feed." + FeedItemDatabaseHelper.COLUMN_ID +
@@ -182,9 +182,11 @@ public class CartDatabaseHelper {
                 int priceIndex = cursor.getColumnIndexOrThrow(FeedItemDatabaseHelper.COLUMN_PRICE);
                 int tagsIndex = cursor.getColumnIndexOrThrow(FeedItemDatabaseHelper.COLUMN_TAGS);
                 int videoUrlIndex = cursor.getColumnIndexOrThrow(FeedItemDatabaseHelper.COLUMN_VIDEO_URL);
-
+                int idIndex = cursor.getColumnIndexOrThrow(CartDatabaseHelper.COLUMN_ID);
+                int productIndex = cursor.getColumnIndexOrThrow(CartDatabaseHelper.COLUMN_FEED_ITEM_ID);
                 do {
                     CartAndFeed cartAndFeed = new CartAndFeed();
+                    cartAndFeed.setId(cursor.getString(idIndex));
                     cartAndFeed.setCount(cursor.getInt(countIndex));
                     cartAndFeed.setType(cursor.getInt(typeIndex));
                     cartAndFeed.setImageUrl(cursor.getString(imageUrlIndex));
@@ -192,6 +194,7 @@ public class CartDatabaseHelper {
                     cartAndFeed.setDescription(cursor.getString(descriptionIndex));
                     cartAndFeed.setPrice(cursor.getString(priceIndex));
                     String tagsString = cursor.getString(tagsIndex);
+                    cartAndFeed.setProductId(cursor.getString(productIndex));
                     if (tagsString != null && !tagsString.isEmpty()) {
                         try {
                             List<String> tags = JSON.parseObject(tagsString, new com.alibaba.fastjson2.TypeReference<List<String>>() {});
