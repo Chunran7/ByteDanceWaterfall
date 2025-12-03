@@ -1,10 +1,15 @@
 package com.team.bytedancewaterfall.adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -13,8 +18,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.team.bytedancewaterfall.R;
+import com.team.bytedancewaterfall.data.pojo.entity.Cart;
+import com.team.bytedancewaterfall.data.pojo.entity.User;
 import com.team.bytedancewaterfall.data.pojo.vo.CartAndFeed;
-import com.team.bytedancewaterfall.utils.MediaLoaderUtils;
+import com.team.bytedancewaterfall.data.service.impl.CartServiceImpl;
+import com.team.bytedancewaterfall.data.service.impl.UserServiceImpl;
+import com.team.bytedancewaterfall.utils.TimeUtil;
 import com.team.bytedancewaterfall.utils.ToastUtils;
 
 import java.text.DecimalFormat;
@@ -108,8 +117,58 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         if (item.getHasDiscount()) {
             // 这里可以添加优惠标签或信息
         }
-    }
 
+        // 初始化并设置 TextWatcher
+        holder.quantityTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // 留空由失去焦点处理
+            }
+        };
+        holder.quantityTextView.addTextChangedListener(holder.quantityTextWatcher);
+    }
+    private void validateAndUpdateQuantity(CartViewHolder holder, CartAndFeed item, int position) {
+        try {
+            String input = holder.quantityTextView.getText().toString();
+            if (!input.isEmpty()) {
+                int newCount = Integer.parseInt(input);
+                if (newCount > 0) {
+                    // 更新购物车项
+                    Cart cart = new Cart();
+                    cart.setId(item.getId());
+                    cart.setFeedItemId(item.getProductId());
+                    cart.setCount(newCount);
+                    cart.setUpdateTime(TimeUtil.getCurTime());
+                    cart.setUserId(UserServiceImpl.getInstance().getCurrentUser(context).getId());
+                    if (CartServiceImpl.getInstance().updateCartItem(context, cart)) {
+                        item.setCount(newCount);
+                        // 注意：避免触发 TextWatcher
+                        holder.quantityTextView.removeTextChangedListener(holder.quantityTextWatcher);
+                        holder.quantityTextView.setText(String.valueOf(newCount));
+                        holder.quantityTextView.addTextChangedListener(holder.quantityTextWatcher);
+
+                        if (onSelectChangeListener != null) {
+                            onSelectChangeListener.onSelectChanged();
+                        }
+                    }
+                } else {
+                    // 恢复原来的值
+                    holder.quantityTextView.setText(String.valueOf(item.getCount()));
+                    ToastUtils.showShortToast(context, "数量不能小于1");
+                }
+            }
+        } catch (NumberFormatException e) {
+            // 恢复原来的值
+            holder.quantityTextView.setText(String.valueOf(item.getCount()));
+            ToastUtils.showShortToast(context, "请输入有效的数字");
+        }
+    }
     private void setupListeners(final CartViewHolder holder, final CartAndFeed item, final int position) {
         // 选择框点击事件
         holder.selectCheckbox.setOnClickListener(v -> {
@@ -119,35 +178,30 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                 onSelectChangeListener.onSelectChanged();
             }
         });
-
-        // 减少数量按钮
-        holder.decreaseButton.setOnClickListener(v -> {
-            int currentCount = item.getCount();
-            if (currentCount > 1) {
-                item.setCount(currentCount - 1);
-                holder.quantityTextView.setText(String.valueOf(item.getCount()));
-                if (onSelectChangeListener != null) {
-                    onSelectChangeListener.onSelectChanged();
+            // 直接输入 数量
+          holder.quantityTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (!hasFocus) { // 失去焦点时验证并保存
+                        validateAndUpdateQuantity(holder, item, position);
+                    }
                 }
-            } else {
-                // 数量为1时，提示用户是否删除
-                ToastUtils.showShortToast(context, "是否删除该商品？");
-                // 这里可以添加确认删除的对话框
-            }
-        });
-
+          });
         // 增加数量按钮
         holder.increaseButton.setOnClickListener(v -> {
             int currentCount = item.getCount();
-            int stock = item.getStock() > 0 ? item.getStock() : Integer.MAX_VALUE;
-            if (currentCount < stock) {
+            Cart cart = new Cart();
+            cart.setId(item.getId());
+            cart.setFeedItemId(item.getProductId());
+            cart.setCount(currentCount + 1);
+            cart.setUpdateTime(TimeUtil.getCurTime());
+            cart.setUserId(UserServiceImpl.getInstance().getCurrentUser(context).getId());
+            if (CartServiceImpl.getInstance().updateCartItem(context, cart)) {
                 item.setCount(currentCount + 1);
                 holder.quantityTextView.setText(String.valueOf(item.getCount()));
                 if (onSelectChangeListener != null) {
                     onSelectChangeListener.onSelectChanged();
                 }
-            } else {
-                ToastUtils.showShortToast(context, "已达到最大库存");
             }
         });
 
@@ -160,6 +214,46 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.itemView.setOnClickListener(v -> {
             // 跳转到商品详情页
             ToastUtils.showShortToast(context, "查看商品详情");
+        });
+        // 减少购物车商品数量
+        holder.decreaseButton.setOnClickListener(v -> {
+            if (item.getCount() > 1) {
+                item.setCount(item.getCount() - 1);
+                holder.quantityTextView.setText(String.valueOf(item.getCount()));
+                Cart cart = new Cart();
+                cart.setId(item.getId());
+                cart.setFeedItemId(item.getProductId());
+                cart.setCount(item.getCount());
+                cart.setUpdateTime(TimeUtil.getCurTime());
+                cart.setUserId(UserServiceImpl.getInstance().getCurrentUser(context).getId());
+                // 更新数据库
+                CartServiceImpl.getInstance().updateCartItem(context, cart);
+                if (onSelectChangeListener != null) {
+                    onSelectChangeListener.onSelectChanged();
+                }
+                notifyDataSetChanged();
+            }else {
+                // 数量为1时，删除
+                // 确认删除提示
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("确认删除")
+                        .setMessage("确定要删除该商品吗？")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                CartServiceImpl.getInstance().deleteCartItem(context, item.getId());
+                                cartList.remove(item);
+                                notifyDataSetChanged();
+                                ToastUtils.showShortToast(context, "已删除该商品");
+                            }
+                        })
+                        .setNegativeButton("取消", null)
+                        .show();
+/*                CartServiceImpl.getInstance().deleteCartItem(context, item.getId());
+                cartList.remove(item);
+                notifyDataSetChanged();
+                ToastUtils.showShortToast(context, "已删除该商品");*/
+            }
         });
     }
 
@@ -234,11 +328,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         TextView priceTextView;
         TextView originalPriceTextView;
         Button decreaseButton;
-        TextView quantityTextView;
+        EditText quantityTextView;
         Button increaseButton;
         TextView shopNameTextView;
         ImageView shopMoreButton;
 
+        // 添加 TextWatcher 成员变量
+        TextWatcher quantityTextWatcher;
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
             selectCheckbox = itemView.findViewById(R.id.select_checkbox);

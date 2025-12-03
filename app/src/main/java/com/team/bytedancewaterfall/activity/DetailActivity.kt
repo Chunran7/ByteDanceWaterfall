@@ -23,7 +23,6 @@ import com.team.bytedancewaterfall.R
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem
 import com.team.bytedancewaterfall.data.service.impl.CartServiceImpl
 import com.team.bytedancewaterfall.data.service.impl.UserServiceImpl
-import com.team.bytedancewaterfall.utils.PurchaseUtils
 import com.team.bytedancewaterfall.utils.ToastUtils
 
 /**
@@ -124,7 +123,8 @@ class DetailActivity : AppCompatActivity() {
         }
         // 购买按钮
         btnBuyNow.setOnClickListener {
-            // TODO 购买方法
+            // TODO 预留立即购买方法调用
+            ToastUtils.showShortToast(this, "购买方法开发中")
 //            currentFeedItem?.let { item ->
 //                PurchaseUtils.buyNow(this, item)
 //            }

@@ -240,6 +240,7 @@ public class FeedScrollActivity extends AppCompatActivity {
             @Override
             public void onBuyNowClick(int position, FeedItem feedItem) {
                 // TODO 预留立即购买方法调用
+                ToastUtils.showShortToast(FeedScrollActivity.this, "购买方法开发中");
             }
         });
         // 滚动到指定位置，确保点击的feeditem直接显示在屏幕顶部

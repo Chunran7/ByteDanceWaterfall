@@ -181,6 +181,7 @@ public class CartActivity extends BaseBottomNavActivity implements CartAdapter.O
         selectAllTextView.setOnClickListener(v -> {
             isAllSelected = !isAllSelected;
             cartAdapter.selectAll(isAllSelected);
+            selectAllTextView.setText(isAllSelected ? "取消全选" : "全选");
             updateTotalPrice();
         });
 
@@ -200,7 +201,7 @@ public class CartActivity extends BaseBottomNavActivity implements CartAdapter.O
                 }
                 sb.append("总价：¥").append(totalPriceTextView.getText().toString().substring(3)); // 去掉"合计:"前缀
                 
-                ToastUtils.showShortToast(this, sb.toString());
+                ToastUtils.showShortToast(this, "结算功能开发中");
                 // 这里可以跳转到结算页面
             }
         });
