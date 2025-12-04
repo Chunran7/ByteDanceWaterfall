@@ -3,6 +3,7 @@ package com.team.bytedancewaterfall.adapter;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.team.bytedancewaterfall.R;
+import com.team.bytedancewaterfall.activity.DetailActivity;
 import com.team.bytedancewaterfall.data.pojo.entity.Cart;
 import com.team.bytedancewaterfall.data.pojo.entity.User;
 import com.team.bytedancewaterfall.data.pojo.vo.CartAndFeed;
@@ -207,13 +209,25 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         // 店铺更多按钮
         holder.shopMoreButton.setOnClickListener(v -> {
-            ToastUtils.showShortToast(context, "店铺操作");
+            // 创建选项弹窗
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle("商品操作")
+                    .setItems(new CharSequence[]{"删除商品"}, (dialog, which) -> {
+                        switch (which) {
+                            case 0: // 删除商品选项
+                                showDeleteConfirmDialog(item, position);
+                                break;
+                        }
+                    })
+                    .show();
         });
 
         // 商品点击事件
         holder.itemView.setOnClickListener(v -> {
             // 跳转到商品详情页
-            ToastUtils.showShortToast(context, "查看商品详情");
+            Intent intent = new Intent(context, DetailActivity.class);
+            intent.putExtra(DetailActivity.EXTRA_FEED_ITEM, item);
+            context.startActivity(intent);
         });
         // 减少购物车商品数量
         holder.decreaseButton.setOnClickListener(v -> {
@@ -249,10 +263,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                         })
                         .setNegativeButton("取消", null)
                         .show();
-/*                CartServiceImpl.getInstance().deleteCartItem(context, item.getId());
-                cartList.remove(item);
-                notifyDataSetChanged();
-                ToastUtils.showShortToast(context, "已删除该商品");*/
             }
         });
     }
@@ -307,7 +317,24 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public void setData(List<CartAndFeed> newData) {
         updateData(newData);
     }
-
+    private void showDeleteConfirmDialog(CartAndFeed item, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("确认删除")
+                .setMessage("确定要删除该商品吗？")
+                .setPositiveButton("确定", (dialog, which) -> {
+                    // 执行删除操作
+                    CartServiceImpl.getInstance().deleteCartItem(context, item.getId());
+                    cartList.remove(position);
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, cartList.size() - position);
+                    if (onSelectChangeListener != null) {
+                        onSelectChangeListener.onSelectChanged();
+                    }
+                    ToastUtils.showShortToast(context, "已在购物车中移除该商品");
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
     // 删除商品
     public void removeItem(int position) {
         if (position >= 0 && position < cartList.size()) {
