@@ -488,7 +488,7 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
         if (holder.playerView != null) {
             holder.imageView.setVisibility(View.GONE);
             holder.playerView.setVisibility(View.VISIBLE);
-            
+
             // 使用MediaLoaderUtils创建播放器
             holder.player = MediaLoaderUtils.createExoPlayer(
                     holder.itemView.getContext(),
@@ -499,17 +499,11 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
                         @Override
                         public void onPlaybackStateChanged(int playbackState) {
                             // 可以在这里处理不同的播放状态
-                            if (playbackState == Player.STATE_BUFFERING) {
-                                // 缓冲中，可以显示加载指示器
-                            } else if (playbackState == Player.STATE_READY) {
-                                // 准备就绪
-                            }
                         }
                         
                         @Override
                         public void onPlayerError(PlaybackException error) {
                             // 处理播放错误
-                            // 可以尝试重新播放或降级播放质量
                         }
                     }
             );
@@ -537,3 +531,4 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
         players.clear();
     }
 }
+

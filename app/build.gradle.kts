@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.team.bytedancewaterfall"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.team.bytedancewaterfall"
@@ -48,6 +48,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.media3.common)
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -69,7 +70,7 @@ dependencies {
     kapt("com.github.bumptech.glide:compiler:4.16.0")
     
     // ExoPlayer for video playback
-    implementation("androidx.media3:media3-exoplayer:1.3.1")
-    implementation("androidx.media3:media3-ui:1.3.1")
-    implementation("androidx.media3:media3-exoplayer-dash:1.3.1")
+    implementation("androidx.media3:media3-exoplayer:1.8.0")
+    implementation("androidx.media3:media3-ui:1.8.0")
+    implementation("androidx.media3:media3-exoplayer-dash:1.8.0")
 }

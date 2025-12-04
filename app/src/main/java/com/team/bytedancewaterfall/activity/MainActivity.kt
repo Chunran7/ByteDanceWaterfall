@@ -212,16 +212,8 @@ class MainActivity : BaseBottomNavActivity() {
             // 安全地获取当前点击项在列表中的索引
             val currentIndex = feedList.indexOf(feedItem)
             if (currentIndex >= 0) {
-                // 创建一个新的ArrayList来存储从当前索引开始的数据
-                val remainingItems = ArrayList<FeedItem>()
-                
-                // 手动添加从当前索引开始的所有元素，避免subList可能带来的问题
-                for (i in 0 until feedList.size) {
-                    remainingItems.add(feedList[i])
-                }
-                
-                // 传递从当前点击项开始的子列表数据
-                intent.putExtra(FeedScrollActivity.EXTRA_FEED_ITEMS, remainingItems)
+                // 传递单个FeedItem和起始索引
+                intent.putExtra(FeedScrollActivity.EXTRA_FEED_ITEM, feedItem)
                 // 传递起始索引
                 intent.putExtra(FeedScrollActivity.EXTRA_START_INDEX, currentIndex)
                 

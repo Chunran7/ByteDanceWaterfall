@@ -2,19 +2,16 @@ package com.team.bytedancewaterfall.activity;
 
 
 
-import static com.team.bytedancewaterfall.activity.LoginActivity.USER_TOKEN;
-
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.team.bytedancewaterfall.R;
 import com.team.bytedancewaterfall.data.pojo.entity.FeedItem;
 import com.team.bytedancewaterfall.adapter.FeedScrollAdapter;
@@ -22,7 +19,6 @@ import com.team.bytedancewaterfall.data.pojo.entity.User;
 import com.team.bytedancewaterfall.data.service.impl.CartServiceImpl;
 import com.team.bytedancewaterfall.data.service.impl.FeedServiceImpl;
 import com.team.bytedancewaterfall.data.service.impl.UserServiceImpl;
-import com.team.bytedancewaterfall.utils.SPUtils;
 import com.team.bytedancewaterfall.utils.ToastUtils;
 
 import java.io.Serializable;
@@ -31,9 +27,12 @@ import java.util.List;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener;
+import android.view.View;
+import android.view.ViewGroup;
+import androidx.recyclerview.widget.PagerSnapHelper;
+import androidx.recyclerview.widget.SnapHelper;
 
 /**
  * FeedScrollActivity
@@ -41,18 +40,16 @@ import androidx.recyclerview.widget.RecyclerView.OnScrollListener;
  */
 public class FeedScrollActivity extends AppCompatActivity {
 
-    public static final String EXTRA_FEED_ITEMS = "extra_feed_items";
+    public static final String EXTRA_FEED_ITEM = "extra_feed_item";
     public static final String EXTRA_START_INDEX = "extra_start_index";
 
     private RecyclerView recyclerView;
     private FeedScrollAdapter feedAdapter;
-    private List<FeedItem> feedItems = new ArrayList<>();
+    private final List<FeedItem> feedItems = new ArrayList<>();
     private int startIndex = 0;
     private boolean isScrolling = false; // 标记是否正在滚动
     private Handler mainHandler = new Handler(Looper.getMainLooper()); // 主线程Handler，用于延迟操作
-    private List<FeedItem> originalFeedItems = new ArrayList<>(); // 保存原始数据的副本
-    private int currentDataIndex = 0; // 当前数据索引，用于循环加载
-    private int batchSize = 10; // 每次加载的数据量
+    private final int batchSize = 10; // 每次加载的数据量
     private boolean isLoading = false; // 标记是否正在加载数据
     private static final int VISIBLE_THRESHOLD = 5; // 预加载阈值
     
@@ -73,6 +70,9 @@ public class FeedScrollActivity extends AppCompatActivity {
 
         // 设置适配器
         setupRecyclerView();
+
+        // 加载初始数据
+        loadInitialData();
     }
     
     @Override
@@ -119,57 +119,97 @@ public class FeedScrollActivity extends AppCompatActivity {
     /**
      * 从Intent中提取传递过来的数据（FeedItem列表和起始索引）
      */
-    @SuppressWarnings("unchecked")
     private void getIntentData() {
-        // 接收List<FeedItem>和count参数
-        Serializable serializable = getIntent().getSerializableExtra(EXTRA_FEED_ITEMS);
-        if (serializable instanceof List<?>) {
-            List<?> list = (List<?>) serializable;
-            if (!list.isEmpty() && list.get(0) instanceof FeedItem) {
-                List<FeedItem> allFeedItems = (List<FeedItem>) list;
-                originalFeedItems.addAll(allFeedItems); // 保存原始数据
-                
-                // 获取起始索引
-                startIndex = getIntent().getIntExtra(EXTRA_START_INDEX, 0);
-                currentDataIndex = startIndex;
-                
-                // 保留完整数据列表，不再截取子列表
-                feedItems = new ArrayList<>(allFeedItems);
-            }
+        // 接收单个FeedItem参数
+        Serializable serializable = getIntent().getSerializableExtra(EXTRA_FEED_ITEM);
+        if (serializable instanceof FeedItem) {
+            FeedItem feedItem = (FeedItem) serializable;
+            
+            // 将点击的项目添加到列表开头
+            feedItems.add(feedItem);
+            
+            // 获取起始索引
+            startIndex = getIntent().getIntExtra(EXTRA_START_INDEX, 0);
         }
+    }
+    
+    /**
+     * 加载初始数据
+     */
+    private void loadInitialData() {
+        // 加载第一页数据
+        loadMoreData();
     }
 
     /**
      * 配置RecyclerView及其相关组件：LayoutManager、Adapter及点击监听等
      */
     private void setupRecyclerView() {
-        // 设置布局管理器
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        // 使用垂直LinearLayoutManager
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
+
+        // 使用PagerSnapHelper实现每页一个卡片（单列、卡片占满整个屏幕）
+        SnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(recyclerView);
 
         // 创建适配器
         feedAdapter = new FeedScrollAdapter(feedItems);
         recyclerView.setAdapter(feedAdapter);
         
+        // 确保每个子项的高度等于RecyclerView的高度，从而卡片能占满整个屏幕
+        recyclerView.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
+            @Override
+            public void onChildViewAttachedToWindow(@NonNull View view) {
+                int height = recyclerView.getHeight();
+                if (height > 0) {
+                    ViewGroup.LayoutParams lp = view.getLayoutParams();
+                    if (lp != null) {
+                        lp.height = height;
+                        view.setLayoutParams(lp);
+                    }
+                } else {
+                    // 如果RecyclerView还没测量好，高度为0，则延后设置
+                    recyclerView.post(() -> {
+                        int h = recyclerView.getHeight();
+                        if (h > 0) {
+                            ViewGroup.LayoutParams lp = view.getLayoutParams();
+                            if (lp != null) {
+                                lp.height = h;
+                                view.setLayoutParams(lp);
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onChildViewDetachedFromWindow(@NonNull View view) {
+                // no-op
+            }
+        });
+
         // 添加滚动监听，用于优化视频加载和实现循环加载
         recyclerView.addOnScrollListener(new OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 
                 isScrolling = newState != RecyclerView.SCROLL_STATE_IDLE;
                 
                 if (isScrolling) {
-                    // 滚动时暂停加载视频
+                    // 滚动时暂停加载视频并暂停所有播放
                     feedAdapter.pauseVideoLoading();
+                    feedAdapter.pauseAllVideos();
                 } else {
-                    // 停止滚动后，加载当前可见区域的视频
+                    // 停止滚动后，加载当前可见页面的视频并恢复播放
                     feedAdapter.resumeVideoLoading(recyclerView);
+                    feedAdapter.resumeAllVideos();
                 }
             }
             
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 
                 // 只有向下滚动且不在加载中时才检查是否需要加载更多
@@ -179,8 +219,8 @@ public class FeedScrollActivity extends AppCompatActivity {
                         int totalItemCount = layoutManager.getItemCount();
                         int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
                         
-                        // 如果最后可见项接近列表末尾，并且原始数据不为空，则加载更多数据
-                        if (totalItemCount > 0 && lastVisibleItemPosition >= totalItemCount - VISIBLE_THRESHOLD && !originalFeedItems.isEmpty()) {
+                        // 如果最后可见项接近列表末尾，则加载更多数据
+                        if (totalItemCount > 0 && lastVisibleItemPosition >= totalItemCount - VISIBLE_THRESHOLD) {
                             loadMoreData();
                         }
                     }
@@ -197,7 +237,7 @@ public class FeedScrollActivity extends AppCompatActivity {
                 intent.putExtra(DetailActivity.EXTRA_FEED_ITEM, feedItem);
                 startActivity(intent);
             }
-            private ActivityResultLauncher<Intent> loginLauncher = registerForActivityResult(
+            private final ActivityResultLauncher<Intent> loginLauncher = registerForActivityResult(
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
                         if (result.getResultCode() == RESULT_OK) {
@@ -239,19 +279,16 @@ public class FeedScrollActivity extends AppCompatActivity {
                 ToastUtils.showShortToast(FeedScrollActivity.this, "购买方法开发中");
             }
         });
-        // 滚动到指定位置，确保点击的feeditem直接显示在屏幕顶部
+        // 滚动到指定位置，确保点击的feeditem直接显示在屏幕顶部（现在是整页显示）
         if (startIndex >= 0 && startIndex < feedItems.size()) {
             // 使用scrollToPosition直接定位到起始索引位置
             recyclerView.scrollToPosition(startIndex);
             
             // 确保RecyclerView布局完成后，将指定项滚动到视图顶部
-            recyclerView.post(new Runnable() {
-                @Override
-                public void run() {
-                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                    if (layoutManager != null && startIndex < feedItems.size()) {
-                        layoutManager.scrollToPositionWithOffset(startIndex, 0);
-                    }
+            recyclerView.post(() -> {
+                LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (lm != null && startIndex < feedItems.size()) {
+                    lm.scrollToPositionWithOffset(startIndex, 0);
                 }
             });
         }
@@ -267,30 +304,27 @@ public class FeedScrollActivity extends AppCompatActivity {
         isLoading = true;
         
         // 使用Handler模拟网络请求延迟
-        mainHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // 从服务中获取下一页数据
-                List<FeedItem> newItems = FeedServiceImpl.getInstance().pageQueryFeedList(FeedScrollActivity.this, currentPage, batchSize);
-                
-                // 如果没有更多数据，则重置到第一页
-                if (newItems.isEmpty()) {
-                    currentPage = 1;
-                    newItems = FeedServiceImpl.getInstance().pageQueryFeedList(FeedScrollActivity.this, currentPage, batchSize);
-                }
-                
-                // 增加页码，以便下次加载下一页
-                currentPage++;
-                
-                // 添加新数据到列表
-                int startPosition = feedItems.size();
-                feedItems.addAll(newItems);
-                
-                // 通知适配器数据变化
-                feedAdapter.notifyItemRangeInserted(startPosition, newItems.size());
-                
+        mainHandler.postDelayed(() -> {
+            // 从服务中获取下一页数据
+            List<FeedItem> newItems = FeedServiceImpl.getInstance().pageQueryFeedList(FeedScrollActivity.this, currentPage, batchSize);
+
+            // 如果没有更多数据，则停止加载
+            if (newItems.isEmpty()) {
                 isLoading = false;
+                return;
             }
+
+            // 增加页码，以便下次加载下一页
+            currentPage++;
+
+            // 添加新数据到列表
+            int startPosition = feedItems.size();
+            feedItems.addAll(newItems);
+
+            // 通知适配器数据变化
+            feedAdapter.notifyItemRangeInserted(startPosition, newItems.size());
+
+            isLoading = false;
         }, 500); // 模拟500ms的加载延迟
     }
 }
