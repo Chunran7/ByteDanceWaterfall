@@ -47,7 +47,8 @@ public class FeedItem implements Serializable {
     public FeedItem() {
     }
     
-    public FeedItem(String id, int type, String imageUrl, String title, String description, String price, List<String> tags, String videoUrl) {
+    public FeedItem(String id, int type, String imageUrl, String title, String description, String price,
+                    List<String> tags, String videoUrl, int imgWidth, int imgHeight) {
         this.id = id;
         this.type = type;
         this.imageUrl = imageUrl;
@@ -56,6 +57,8 @@ public class FeedItem implements Serializable {
         this.price = price;
         this.tags = tags;
         this.videoUrl = videoUrl;
+        this.imgWidth = imgWidth;
+        this.imgHeight = imgHeight;
     }
     
     public FeedItem(String id, int type, String imageUrl, String title){
@@ -186,6 +189,8 @@ public class FeedItem implements Serializable {
         values.put("price", price);
         values.put("tags", JSON.toJSONString(tags));
         values.put("videoUrl", videoUrl);
+        values.put("imgWidth", imgWidth);
+        values.put("imgHeight", imgHeight);
         return values;
     }
 }
