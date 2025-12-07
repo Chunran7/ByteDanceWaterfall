@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.team.bytedancewaterfall.activity.FeedScrollActivity;
+import com.team.bytedancewaterfall.activity.ForgetPwdActivity;
 import com.team.bytedancewaterfall.data.database.AppDatabaseHelper;
 import com.team.bytedancewaterfall.data.database.UserDatabaseHelper;
 import com.team.bytedancewaterfall.data.pojo.dto.LoginDTO;
@@ -127,6 +128,48 @@ public class UserServiceImpl implements UserService {
             Log.e("UserServiceImpl", "Failed to update user avatar", e);
             return false;
         }
+    }
+
+    @Override
+    public User getUserById(Context context, String userId) {
+        if (userId == null || userId.isEmpty()) {
+            return null;
+        }
+        try {
+            UserDatabaseHelper userDatabaseHelper = new UserDatabaseHelper(context);
+            return userDatabaseHelper.getUserById(userId);
+        }catch (Exception e) {
+            Log.e("UserServiceImpl", "Failed to get user by id", e);
+        }
+        return null;
+    }
+
+    @Override
+    public User getUserByUsername(Context context, String username) {
+        if (username == null || username.isEmpty()) {
+            return null;
+        }
+        try {
+            UserDatabaseHelper userDatabaseHelper = new UserDatabaseHelper(context);
+            return userDatabaseHelper.getUserByUserName(username);
+        }catch (Exception e) {
+            Log.e("UserServiceImpl", "Failed to get user by username", e);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean updateUser(Context context, User user) {
+        if (user == null || user.getId() == null || user.getId().isEmpty()) {
+            return false;
+        }
+        try {
+            UserDatabaseHelper userDatabaseHelper = new UserDatabaseHelper(context);
+            return userDatabaseHelper.updateUser(user);
+        } catch (Exception e) {
+            Log.e("UserServiceImpl", "Failed to update user", e);
+        }
+        return false;
     }
 }
 

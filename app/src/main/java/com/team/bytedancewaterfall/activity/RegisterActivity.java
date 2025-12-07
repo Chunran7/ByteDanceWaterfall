@@ -18,6 +18,8 @@ import com.team.bytedancewaterfall.data.pojo.entity.User;
 import com.team.bytedancewaterfall.data.service.UserService;
 import com.team.bytedancewaterfall.data.service.impl.UserServiceImpl;
 
+import java.util.UUID;
+
 import cn.javaex.htool.core.string.StringUtils;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -116,6 +118,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         // 创建用户对象
         User user = new User();
+        user.setId(UUID.randomUUID().toString());
         user.setUsername(username);
         user.setPassword(password);
         user.setEmail(email);

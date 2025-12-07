@@ -2,6 +2,7 @@ package com.team.bytedancewaterfall.data.database;
 
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -130,6 +131,60 @@ public class UserDatabaseHelper {
         } catch (Exception e) {
             Log.e(TAG, "Error updating user avatar", e);
         } finally {
+            db.endTransaction();
+        }
+        return false;
+    }
+
+    public User getUserById(String userId) {
+        String sql = "SELECT * FROM " + TABLE_NOTES + " WHERE " + COLUMN_ID + " = ?";
+        User user = null;
+        Cursor cursor = null;
+        try {
+            cursor = db.rawQuery(sql, new String[]{userId});
+            if (cursor != null && cursor.moveToFirst()) {
+                user = new User();
+                user.setId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)));
+                user.setUsername(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME)));
+                user.setPassword(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD)));
+                user.setToken(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TOKEN)));
+                user.setAvatar(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_AVATAR)));
+                user.setNickname(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NICKNAME)));
+                user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)));
+                user.setPhone(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE)));
+                return user;
+            }
+            cursor.close();
+        }catch (Exception e) {
+            if (cursor != null) {
+                cursor.close();
+            }
+            Log.e(TAG, "Error getting user by id", e);
+        }finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return user;
+    }
+
+    public boolean updateUser(User user) {
+        if (user == null || user.getId() == null || user.getId().isEmpty()) {
+            return false;
+        }
+        db.beginTransaction();
+        try {
+            ContentValues contentValues = user.toContentValues();
+            int update = db.update(TABLE_NOTES, contentValues, COLUMN_ID + " = ?", new String[]{user.getId()});
+            if (update > 0) {
+                db.setTransactionSuccessful();
+                return true;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating user", e);
+            db.endTransaction();
+            return false;
+        }finally {
             db.endTransaction();
         }
         return false;
