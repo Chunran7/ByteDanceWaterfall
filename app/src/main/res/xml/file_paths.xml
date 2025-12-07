@@ -9,4 +9,9 @@
     <external-path
         name="external_movies"
         path="Movies/ByteDanceWaterfall/" /> <!-- 与 APP_DIR_NAME 一致 -->
+
+    <!-- 配置外部图片目录，用于相机拍照 -->
+    <external-path
+        name="external_pictures"
+        path="Android/data/com.team.bytedancewaterfall/files/Pictures/" />
 </paths>

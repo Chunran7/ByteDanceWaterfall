@@ -7,24 +7,38 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.team.bytedancewaterfall.R;
-import com.team.bytedancewaterfall.activity.LoginActivity;
+import com.team.bytedancewaterfall.data.fileManage.PrivateMediaStorageManager;
 import com.team.bytedancewaterfall.data.pojo.entity.User;
 import com.team.bytedancewaterfall.data.service.impl.UserServiceImpl;
-import com.team.bytedancewaterfall.utils.JWTUtil;
 import com.team.bytedancewaterfall.utils.SPUtils;
 import com.team.bytedancewaterfall.utils.ToastUtils;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 
 import java.io.File;
@@ -50,8 +64,26 @@ public class MyInfoActivity extends BaseBottomNavActivity {
         initBottomNavigation();
     }
 
+    // 拍照和选择图片的请求码
+    private static final int REQUEST_CAMERA = 1;
+    private static final int REQUEST_GALLERY = 2;
+    private String currentPhotoPath; // 保存拍照后的图片路径
+
     private void setListener() {
         // 设置各项监听
+        // 头像点击事件
+        userIconView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String userToken = SPUtils.getInstance(MyInfoActivity.this).getString(USER_TOKEN, "");
+                if (userToken.isEmpty()) {
+                    ToastUtils.showShortToast(MyInfoActivity.this, "请先登录");
+                    return;
+                }
+                showAvatarOptionDialog();
+            }
+        });
+
         // 登出按钮监听
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,7 +99,8 @@ public class MyInfoActivity extends BaseBottomNavActivity {
                                 SPUtils.getInstance(MyInfoActivity.this).remove(USER_TOKEN);
                                 Intent intent = new Intent(MyInfoActivity.this, MyInfoActivity.class);
                                 startActivity(intent);
-                                finish();
+                                updateLoginBotton();
+                                setView();
                             }
                         })
                         .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -134,6 +167,120 @@ public class MyInfoActivity extends BaseBottomNavActivity {
     }
 
     /**
+     * 显示头像选择对话框
+     */
+    private void showAvatarOptionDialog() {
+        String[] options = {"拍照", "从相册选择"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("选择头像");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+                        // 拍照
+                        dispatchTakePictureIntent();
+                        break;
+                    case 1:
+                        // 从相册选择
+                        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        startActivityForResult(galleryIntent, REQUEST_GALLERY);
+                        break;
+                }
+            }
+        });
+        builder.create().show();
+    }
+
+    /**
+     * 启动相机拍照
+     */
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // 确保有相机应用可以处理这个Intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // 创建一个临时文件来保存照片
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // 错误发生时处理
+                Log.e("MyInfoActivity", "Error creating image file", ex);
+            }
+            // 继续只有当文件被成功创建时
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this, "com.team.bytedancewaterfall.fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_CAMERA);
+            }
+        }
+    }
+
+    /**
+     * 创建临时图片文件
+     */
+    private File createImageFile() throws IOException {
+        // 创建一个唯一的文件名
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* 前缀 */
+                ".jpg",         /* 后缀 */
+                storageDir      /* 目录 */
+        );
+
+        // 保存文件的绝对路径
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    /**
+     * 处理相机和相册返回的结果
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            String imagePath = null;
+
+            if (requestCode == REQUEST_CAMERA) {
+                // 从相机返回
+                try {
+                    // 使用PrivateMediaStorageManager保存图片到私有目录
+                    FileInputStream fis = new FileInputStream(currentPhotoPath);
+                    imagePath = PrivateMediaStorageManager.saveJpgImageToPrivateDir(this, fis, "avatars");
+                    fis.close();
+                } catch (IOException e) {
+                    Log.e("MyInfoActivity", "Error saving camera image", e);
+                }
+            } else if (requestCode == REQUEST_GALLERY && data != null) {
+                // 从相册返回
+                Uri selectedImage = data.getData();
+                try {
+                    // 使用PrivateMediaStorageManager保存图片到私有目录
+                    InputStream is = getContentResolver().openInputStream(selectedImage);
+                    if (is != null) {
+                        imagePath = PrivateMediaStorageManager.saveJpgImageToPrivateDir(this, is, "avatars");
+                        is.close();
+                    }
+                } catch (IOException e) {
+                    Log.e("MyInfoActivity", "Error saving gallery image", e);
+                }
+            }
+
+            if (imagePath != null) {
+                // 更新数据库中的头像路径
+                String userId = UserServiceImpl.getInstance().getCurrentUser(this).getId();
+                UserServiceImpl.getInstance().updateUserAvatar(this, userId, imagePath);
+                // 刷新界面
+                setView();
+            }
+        }
+    }
+
+    /**
      * 设置组件动态属性
      */
     private void setView() {
@@ -185,5 +332,10 @@ public class MyInfoActivity extends BaseBottomNavActivity {
             logoutButton.setVisibility(View.GONE);
             logintButton.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }

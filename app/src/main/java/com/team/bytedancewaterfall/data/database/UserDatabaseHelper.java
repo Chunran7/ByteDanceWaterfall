@@ -109,5 +109,30 @@ public class UserDatabaseHelper {
         }
         return user;
     }
+
+    public boolean updateUserAvatar(String userId, String avatarPath) {
+        if (userId == null || userId.isEmpty()) {
+            return false;
+        }
+
+        db.beginTransaction();
+        try {
+            // 更新用户头像路径
+            android.content.ContentValues values = new android.content.ContentValues();
+            values.put(COLUMN_AVATAR, avatarPath);
+
+            int rowsAffected = db.update(TABLE_NOTES, values, COLUMN_ID + " = ?", new String[]{userId});
+            if (rowsAffected > 0) {
+                db.setTransactionSuccessful();
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating user avatar", e);
+        } finally {
+            db.endTransaction();
+        }
+        return false;
+    }
 }
 

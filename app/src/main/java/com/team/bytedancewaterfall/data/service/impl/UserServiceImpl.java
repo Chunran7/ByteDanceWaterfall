@@ -104,5 +104,29 @@ public class UserServiceImpl implements UserService {
             return false;
         }
     }
+
+    @Override
+    public boolean updateUserAvatar(Context context, String userId, String avatarPath) {
+        if (userId == null || userId.isEmpty()) {
+            return false;
+        }
+        
+        try {
+            UserDatabaseHelper userDatabaseHelper = new UserDatabaseHelper(context);
+            boolean b = userDatabaseHelper.updateUserAvatar(userId, avatarPath);
+            if (b) {
+                // 更新缓存中当前用户的头像
+                User currentUser = getCurrentUser(context);
+                if (currentUser != null && currentUser.getId().equals(userId)) {
+                    currentUser.setAvatar(avatarPath);
+                    SPUtils.getInstance(context).putString(USER_TOKEN, JWTUtil.generateToken(currentUser));
+                }
+            }
+            return b;
+        } catch (Exception e) {
+            Log.e("UserServiceImpl", "Failed to update user avatar", e);
+            return false;
+        }
+    }
 }
 
