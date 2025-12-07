@@ -10,4 +10,5 @@ public interface UserService {
 
     User getCurrentUser(Context context);
     User getUserByToken(Context context, String token);
+    boolean registerUser(Context context, User user);
 }

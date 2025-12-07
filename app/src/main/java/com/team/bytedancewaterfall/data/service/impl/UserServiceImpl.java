@@ -4,6 +4,7 @@ import static com.team.bytedancewaterfall.activity.LoginActivity.USER_TOKEN;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.team.bytedancewaterfall.activity.FeedScrollActivity;
 import com.team.bytedancewaterfall.data.database.AppDatabaseHelper;
@@ -75,6 +76,32 @@ public class UserServiceImpl implements UserService {
             return PasswordEncryptUtil.verifyPassword(password, passwordInDB);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean registerUser(Context context, User user) {
+        if (user == null || user.getUsername() == null || user.getPassword() == null) {
+            return false;
+        }
+        
+        // 检查用户名是否已存在
+        UserDatabaseHelper userDatabaseHelper = new UserDatabaseHelper(context);
+        User existingUser = userDatabaseHelper.getUserByUserName(user.getUsername());
+        if (existingUser != null) {
+            return false; // 用户名已存在
+        }
+        
+        try {
+            // 对密码进行加密
+            String encryptedPassword = PasswordEncryptUtil.encryptPassword(user.getPassword());
+            user.setPassword(encryptedPassword);
+            
+            // 插入用户数据
+            return userDatabaseHelper.insertUser(user);
+        } catch (Exception e) {
+            Log.e("UserServiceImpl", "Failed to register user", e);
+            return false;
         }
     }
 }
