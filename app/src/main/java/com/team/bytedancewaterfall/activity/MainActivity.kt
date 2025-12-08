@@ -94,11 +94,17 @@ class MainActivity : BaseBottomNavActivity() {
         layoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
         recyclerView.layoutManager = layoutManager
 
-        // 使用 Lambda 表达式设置点击监听，代码更简洁
+        // 使用 Lambda 表达式设置点击和长按监听
         feedAdapter = FeedAdapter(feedList)
         feedAdapter.setOnItemClickListener(object : FeedAdapter.OnItemClickListener {
             override fun onItemClick(position: Int, feedItem: FeedItem) {
                 handleItemClick(feedItem)
+            }
+        })
+        
+        feedAdapter.setOnItemLongClickListener(object : FeedAdapter.OnItemLongClickListener {
+            override fun onItemLongClick(position: Int, feedItem: FeedItem) {
+                showNotInterestedDialog(position, feedItem)
             }
         })
         recyclerView.adapter = feedAdapter
@@ -227,6 +233,36 @@ class MainActivity : BaseBottomNavActivity() {
             // 捕获所有可能的异常，避免应用闪退
             Log.e(TAG, "点击卡片时发生错误: ${e.message}", e)
             Toast.makeText(this, "加载失败，请重试", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * 显示"不感兴趣"对话框
+     */
+    private fun showNotInterestedDialog(position: Int, feedItem: FeedItem) {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("不感兴趣")
+            .setMessage("确定要标记该商品为不感兴趣吗？")
+            .setPositiveButton("确定") { _, _ ->
+                // 从列表中删除当前FeedItem
+                removeFeedItem(position)
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    /**
+     * 从列表中删除FeedItem
+     */
+    private fun removeFeedItem(position: Int) {
+        if (position >= 0 && position < feedList.size) {
+            feedList.removeAt(position)
+            feedAdapter.notifyItemRemoved(position)
+            // 通知位置变化
+            feedAdapter.notifyItemRangeChanged(position, feedList.size - position)
+            // 重新计算布局
+            layoutManager.invalidateSpanAssignments()
+            Log.d(TAG, "成功删除FeedItem，位置：$position")
         }
     }
 
