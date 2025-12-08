@@ -7,15 +7,26 @@
     android:background="#FFFFFF"
     android:layout_marginBottom="8dp">
 
-    <!-- 图片展示区域 -->
-    <ImageView
-        android:id="@+id/item_image"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:scaleType="centerCrop"
-        android:contentDescription="Feed图片" />
-    
-    <!-- 视频播放区域 -->
+        android:layout_height="400dp">
+
+        <ImageView
+            android:id="@+id/iv_blur_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:alpha="0.8"
+            android:background="#000000"
+            android:contentDescription="背景模糊图" />
+
+        <ImageView
+            android:id="@+id/item_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:contentDescription="商品原图" />
+    </FrameLayout>
     <androidx.media3.ui.PlayerView
         android:id="@+id/item_player_view"
         android:layout_width="match_parent"
@@ -25,7 +36,6 @@
         app:show_buffering="when_playing"
         app:resize_mode="fit" />
 
-    <!-- 底部信息区域 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,7 +44,6 @@
         android:padding="16dp"
         android:background="#FFFFFF">
 
-        <!-- 标题 -->
         <TextView
             android:id="@+id/item_title"
             android:layout_width="match_parent"
@@ -45,7 +54,6 @@
             android:textColor="#333333"
             android:textSize="16sp" />
 
-        <!-- 价格 -->
         <TextView
             android:id="@+id/item_price"
             android:layout_width="match_parent"
@@ -55,7 +63,6 @@
             android:fontFamily="sans-serif-medium"
             android:layout_marginBottom="16dp" />
 
-        <!-- 操作按钮区域 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
