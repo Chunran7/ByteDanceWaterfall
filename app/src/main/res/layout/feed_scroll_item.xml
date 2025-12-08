@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/item_container"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#FFFFFF"
-    android:layout_marginBottom="8dp">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#000000"> <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1">
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="400dp">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/iv_blur_bg"
@@ -27,20 +30,22 @@
             android:scaleType="fitCenter"
             android:contentDescription="商品原图" />
     </FrameLayout>
+
     <androidx.media3.ui.PlayerView
         android:id="@+id/item_player_view"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="match_parent"
         android:visibility="gone"
         app:use_controller="true"
         app:show_buffering="when_playing"
         app:resize_mode="fit" />
 
+</FrameLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_gravity="bottom"
         android:padding="16dp"
         android:background="#FFFFFF">
 
@@ -52,13 +57,14 @@
             android:ellipsize="end"
             android:maxLines="2"
             android:textColor="#333333"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/item_price"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="#FF4444"
             android:fontFamily="sans-serif-medium"
             android:layout_marginBottom="16dp" />
@@ -67,38 +73,38 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="2">
-
-            <!-- 加入购物车按钮 -->
-            <Button
-                android:id="@+id/btn_add_to_cart"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:background="#FFE5E5"
-                android:text="加入购物车"
-                android:textColor="#FF4444"
-                android:textSize="14sp"
-                android:layout_marginEnd="8dp"
-                android:gravity="center"
-                android:ellipsize="end"
-                android:maxLines="1" />
-
-            <!-- 立即购买按钮 -->
-            <Button
+            android:weightSum="2"
+            xmlns:tools="http://schemas.android.com/tools"> <android.widget.Button
+            android:id="@+id/btn_add_to_cart"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="#FFE5E5"
+            android:text="加入购物车"
+            android:textColor="#D32F2F"
+            android:textSize="14sp"
+            android:layout_marginEnd="8dp"
+            android:stateListAnimator="@null"
+            android:gravity="center"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:ignore="TextContrastCheck" />
+            <android.widget.Button
                 android:id="@+id/btn_buy_now"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="48dp"
                 android:layout_weight="1"
                 android:background="#FF4444"
                 android:text="立即购买"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
                 android:layout_marginStart="8dp"
+                android:stateListAnimator="@null"
                 android:gravity="center"
                 android:ellipsize="end"
-                android:maxLines="1" />
+                android:maxLines="1"
+                tools:ignore="TextContrastCheck" />
         </LinearLayout>
     </LinearLayout>
 
-</FrameLayout>
+</LinearLayout>

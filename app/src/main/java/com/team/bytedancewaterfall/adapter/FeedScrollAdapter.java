@@ -85,7 +85,7 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
      * ViewHolder类，持有每个条目的视图元素
      */
     public static class FeedScrollViewHolder extends RecyclerView.ViewHolder {
-        FrameLayout container;
+        View container;
         ImageView imageView; // 前景清晰图
         ImageView blurBg;    // 【新增】背景模糊图
         TextView titleView;
