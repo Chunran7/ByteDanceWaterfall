@@ -21,13 +21,22 @@ class FeedAdapter(private val feedItems: List<FeedItem>) :
     RecyclerView.Adapter<FeedAdapter.ProductViewHolder>() {
 
     private var onItemClickListener: OnItemClickListener? = null
+    private var onItemLongClickListener: OnItemLongClickListener? = null
 
     interface OnItemClickListener {
         fun onItemClick(position: Int, feedItem: FeedItem)
     }
 
+    interface OnItemLongClickListener {
+        fun onItemLongClick(position: Int, feedItem: FeedItem)
+    }
+
     fun setOnItemClickListener(listener: OnItemClickListener) {
         this.onItemClickListener = listener
+    }
+
+    fun setOnItemLongClickListener(listener: OnItemLongClickListener) {
+        this.onItemLongClickListener = listener
     }
 
     class ProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -81,6 +90,11 @@ class FeedAdapter(private val feedItems: List<FeedItem>) :
 
         holder.itemView.setOnClickListener {
             onItemClickListener?.onItemClick(position, item)
+        }
+
+        holder.itemView.setOnLongClickListener {
+            onItemLongClickListener?.onItemLongClick(position, item)
+            true // 消费长按事件
         }
     }
 
