@@ -38,13 +38,13 @@ public class FeedItemData {
     static{
         feedItemList = new ArrayList<>();
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 2, "drawable://"+R.drawable.test2_1, "大疆Action 6", "DJI大疆 Action6 新品运动相机骑行潜水旅游挂脖防抖vlog户外",
-                "2999.00", Arrays.asList("大疆DJ", "相机", "运动"),"drawable://"+R.raw.video_dj_3, 800, 600));
+                "2999.00", Arrays.asList("大疆DJ", "相机", "运动"),"drawable://"+R.raw.video_dj_3, 1600, 1600));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test1_0, "陶瓷水杯", "精品套餐水杯，泡茶接待客人使用",
-                "19.90", Arrays.asList("陶瓷", "杯子"), null, 500, 400));
+                "19.90", Arrays.asList("陶瓷", "杯子"), null, 2048, 2048));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test1_1, "保温杯", "保温杯定制印logo开业宣传广告杯子公司员工活动纪念礼品水杯刻字",
-                "19.80", Arrays.asList("保温", "水杯", "不锈钢"), null, 1000,800));
+                "19.80", Arrays.asList("保温", "水杯", "不锈钢"), null, 1440,1440));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test1_2, "双层玻璃杯", "定制广告杯子双层玻璃杯赠品水杯印字保温杯定做礼品杯印logo茶杯",
-                "9.90", Arrays.asList("定制logo", "水杯", "双层玻璃"), null, 600, 400));
+                "9.90", Arrays.asList("定制logo", "水杯", "双层玻璃"), null, 800, 800));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test1_3, "健身运动水杯", "Tritan吨桶吨大容量水杯男运动健身2025年新款水壶耐高温大号杯子",
                 "29.90", Arrays.asList("PC材质", "大容量水杯", "可拆卸吸管"), null, 800, 600));
 
@@ -65,13 +65,15 @@ public class FeedItemData {
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 1,  "drawable://"+R.drawable.test_7, "笔记本", "皮革面商务笔记本，2025新款，书写流畅",
                 "15.00", Arrays.asList("办公", "笔记本", "商务"), null, 600, 400));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 2, "drawable://"+R.drawable.test_11, "意式极简布艺沙发", "意式极简布艺沙发弧形客厅大户型别墅设计师异形转角海盐沙发原创",
-                "1500.00", Arrays.asList("家具", "沙发"),"drawable://"+R.raw.video_test_2, 700, 800));
+                "1500.00", Arrays.asList("家具", "沙发"),"drawable://"+R.raw.video_test_2, 750, 1000));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_8, "高颜值双肩大容量背包", "双肩包男士背包大容量电脑包通勤出差休闲旅行包防水轻便书包，2025新款",
                 "119.00", Arrays.asList("双肩包", "大容量", "轻便"), null, 400, 600));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_9, "全自动雨伞加大加厚加固晴雨两用", "全自动雨伞加大加厚加固晴雨两用男士折叠女太阳男生自动伞定制，2025新款",
-                "39.90", Arrays.asList("雨伞", "全自动", "可折叠"), null,100, 700));
+                "39.90", Arrays.asList("雨伞", "全自动", "可折叠"), null,2048, 2048));
         feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.test_10, "可爱猫猫书包挂件", "金属钥匙扣挂件定制logo企业周年校庆纪念礼品定做文创景区钥匙链订制",
                 "9.90", Arrays.asList("挂件", "可定制", "文创"), null, 900, 600));
+        feedItemList.add(new FeedItem(UUID.randomUUID().toString(), 0,  "drawable://"+R.drawable.supersale, "便携式榨汁机", "便携式榨汁机迷你小型家用电动水果汁杯子充电式随身果汁机",
+                "89.00", Arrays.asList("榨汁机", "便携式", "充电"), null, 600, 800));
 
         // 用户初始化
         userList = new ArrayList<>();
