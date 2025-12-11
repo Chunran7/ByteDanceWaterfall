@@ -27,14 +27,6 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (isLogin()) {
-            // 登录过了，直接进入后续的页面
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-//            SPUtils.getInstance(this).remove(USER_TOKEN);
-            finish();
-        }
-        // 没有登录过，进入登录页面
         setContentView(R.layout.login_activity);
         initView();
         setListener();
@@ -126,19 +118,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (isLogin()) {
-            // 登录过了，直接进入后续的页面
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-//            SPUtils.getInstance(this).remove(USER_TOKEN);
-            finish();
-        }
-    }
-
     public boolean isLogin() {
         // 尝试获取登录过的用户
         // 1. 从SharedPreferences中获取用户信息

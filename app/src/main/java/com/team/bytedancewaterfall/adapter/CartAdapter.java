@@ -97,7 +97,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.priceTextView.setText("¥" + (item.getPrice() != null ? item.getPrice() : "0.00"));
         
         // 设置原价（如果有）
-        if (item.getOriginalPrice() != null && !item.getOriginalPrice().equals(item.getPrice())) {
+        if (item.getOriginalPrice() != null && !"0.00".equals(item.getOriginalPrice()) && !item.getOriginalPrice().equals(item.getPrice())) {
             holder.originalPriceTextView.setText("¥" + item.getOriginalPrice());
             holder.originalPriceTextView.setVisibility(View.VISIBLE);
         } else {

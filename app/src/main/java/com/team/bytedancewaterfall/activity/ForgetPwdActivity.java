@@ -95,11 +95,16 @@ public class ForgetPwdActivity extends AppCompatActivity {
                 }
 
                 // 修改密码
-                if (modifyPassword(newPwd)) {
-                    ToastUtils.showShortToast(ForgetPwdActivity.this, "修改密码成功");
-                    // 删除当前缓存(如果有)
-                    SPUtils.getInstance(ForgetPwdActivity.this).remove(USER_TOKEN);
-                    finish();
+                try {
+                    user.setPassword(PasswordEncryptUtil.encryptPassword(newPwd));
+                    if (UserServiceImpl.getInstance().updateUser(ForgetPwdActivity.this, user)) {
+                        ToastUtils.showShortToast(ForgetPwdActivity.this, "修改密码成功");
+                        // 删除当前缓存(如果有)
+                        SPUtils.getInstance(ForgetPwdActivity.this).remove(USER_TOKEN);
+                        finish();
+                    }
+                } catch (NoSuchAlgorithmException |InvalidKeySpecException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
