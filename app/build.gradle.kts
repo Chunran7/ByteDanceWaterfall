@@ -19,8 +19,24 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // 添加签名配置
+    signingConfigs {
+        create("release") {
+            // 密钥库文件路径
+            storeFile = file("src/main/java/com/team/bytedancewaterfall/keys/appkeys")
+            // 密钥库密码
+            storePassword = "bytedance"
+            // 密钥别名
+            keyAlias = "appkeys"
+            // 密钥密码
+            keyPassword = "bytedance"
+        }
+    }
+
     buildTypes {
         release {
+            // 使用release签名配置
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

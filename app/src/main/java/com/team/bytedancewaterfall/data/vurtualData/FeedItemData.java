@@ -153,7 +153,7 @@ public class FeedItemData {
             String resultPath = null;
             if (type == 0) {
                 // 保存为PNG格式图片到私有目录
-                resultPath = PrivateMediaStorageManager.savePngImageToPrivateDir(
+                resultPath = PrivateMediaStorageManager.saveJpegImageToPrivateDir(
                         context,
                         inputStream,
                         subDir
