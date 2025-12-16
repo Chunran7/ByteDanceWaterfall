@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -125,6 +126,12 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
         final FeedItem item = feedItems.get(position);
         Context context = holder.itemView.getContext();
 
+        // === 添加这行日志 ===
+        android.util.Log.e("FeedDebug", "绑定数据: Position=" + position
+                + ", Type=" + item.getType()
+                + ", VideoUrl=" + item.getVideoUrl()
+                + ", Title=" + item.getTitle());
+
         // --- 视图重置逻辑 ---
         holder.imageView.setVisibility(View.VISIBLE);
         if (holder.blurBg != null) {
@@ -139,7 +146,8 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
         String imageUrlToLoad = null;
 
         // 判断是视频还是图片
-        if (item.getType() == 2 && item.getVideoUrl() != null) {
+        boolean hasVideo = item.getVideoUrl() != null && !item.getVideoUrl().isEmpty();
+        if (hasVideo) {
             // 视频类型：先显示封面图作为占位
             // 尝试获取视频封面，如果没有专门的封面字段，暂时用 imageUrl 代替，或者用视频首帧
             // 这里假设 item.getImageUrl() 就是视频封面
@@ -357,6 +365,7 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
     }
 
     private void loadVideo(FeedScrollViewHolder holder, int position, FeedItem item) {
+        Log.d("FeedDebug", "尝试加载视频: pos=" + position + ", url=" + item.getVideoUrl());
         if (!isAppInForeground) return;
         boolean isPriorityPosition = currentPlayingPosition != null && position == currentPlayingPosition;
         if (!MediaLoaderUtils.shouldCreatePlayer(players.size(), MAX_CONCURRENT_PLAYERS, isPriorityPosition)) {
