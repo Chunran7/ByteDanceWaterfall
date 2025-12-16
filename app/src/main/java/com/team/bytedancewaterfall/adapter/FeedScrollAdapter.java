@@ -300,7 +300,10 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
             FeedScrollViewHolder middleHolder = (FeedScrollViewHolder) recyclerView.findViewHolderForAdapterPosition(middlePosition);
             if (middleHolder != null && middlePosition < getItemCount()) {
                 final FeedItem middleItem = feedItems.get(middlePosition);
-                if (middleItem.getType() == 2 && middleItem.getVideoUrl() != null && middleHolder.player == null) {
+                
+                // 新代码（修复）：只判断 URL 是否存在
+                boolean hasVideo = middleItem.getVideoUrl() != null && !middleItem.getVideoUrl().isEmpty();
+                if (hasVideo && middleHolder.player == null) {
                     scheduleDelayedVideoLoad(middleHolder, middlePosition, middleItem);
                 }
             }
@@ -310,7 +313,11 @@ public class FeedScrollAdapter extends RecyclerView.Adapter<FeedScrollAdapter.Fe
                     FeedScrollViewHolder holder = (FeedScrollViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
                     if (holder != null && position < getItemCount()) {
                         final FeedItem item = feedItems.get(position);
-                        if (item.getType() == 2 && item.getVideoUrl() != null && holder.player == null) {
+
+                        
+                        // 新代码（修复）：只判断 URL 是否存在
+                        boolean hasVideo = item.getVideoUrl() != null && !item.getVideoUrl().isEmpty();
+                        if (hasVideo && holder.player == null) {
                             scheduleDelayedVideoLoad(holder, position, item);
                         }
                     }
